@@ -57,21 +57,51 @@ function ProfilePage() {
     <AppShell>
       <header className="rise flex items-center gap-3">
         <div className="grid size-14 place-items-center rounded-2xl bg-ink font-display text-2xl text-amber">
-          R
+          {initial}
         </div>
-        <div>
-          <h1 className="text-lg font-extrabold">Rohan Kumar</h1>
-          <p className="text-xs text-ink-soft">📱 98xxxxxx21 · Pune</p>
+        <div className="min-w-0">
+          <h1 className="truncate text-lg font-extrabold">{displayName}</h1>
+          <p className="truncate text-xs text-ink-soft">
+            {user
+              ? `✉️ ${user.email}${profile?.city ? ` · ${profile.city}` : ""}`
+              : "Login nahi kiya"}
+          </p>
         </div>
       </header>
 
-      {/* demo login note */}
+      {/* account */}
       <section className="rise rounded-3xl bg-lav/10 p-4 ring-1 ring-lav/20 [animation-delay:60ms]">
-        <p className="text-xs font-bold text-lav">🔐 OTP Login (demo mode)</p>
-        <p className="mt-1 text-[11px] text-ink-soft">
-          Real mobile OTP login ke liye backend connect karna hoga — neeche
-          "Backend connect" section dekhein.
-        </p>
+        {loading ? (
+          <p className="text-xs text-ink-soft">Account check kar rahe hain...</p>
+        ) : user ? (
+          <>
+            <p className="text-xs font-bold text-lav">🔐 Email account</p>
+            <p className="mt-1 text-[11px] text-ink-soft">
+              {user.email}
+              {profile?.phone ? ` · 📱 ${profile.phone}` : ""}
+            </p>
+            <button
+              onClick={handleSignOut}
+              className="mt-3 w-full rounded-2xl bg-ink px-4 py-2.5 text-xs font-bold text-white transition active:scale-[0.98]"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-xs font-bold text-lav">🔐 Login karein</p>
+            <p className="mt-1 text-[11px] text-ink-soft">
+              Email aur password se account banayein — booking, payment aur rewards
+              save rahenge.
+            </p>
+            <Link
+              to="/auth"
+              className="mt-3 block rounded-2xl bg-ink px-4 py-2.5 text-center text-xs font-bold text-white transition active:scale-[0.98]"
+            >
+              Login / Account banayein
+            </Link>
+          </>
+        )}
       </section>
 
       {/* role panels */}
