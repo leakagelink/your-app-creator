@@ -13,8 +13,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-ice via-paper to-ice font-sans text-ink antialiased">
-      <div className="relative mx-auto min-h-screen max-w-[420px]">
+    <div className="min-h-[100dvh] w-full bg-gradient-to-b from-ice via-paper to-ice font-sans text-ink antialiased">
+      <div className="relative mx-auto min-h-[100dvh] w-full max-w-[420px]">
         {/* ambient blobs */}
         <div className="pointer-events-none absolute -top-24 -left-16 size-72 rounded-full bg-lav/25 blur-3xl" />
         <div className="pointer-events-none absolute top-40 -right-20 size-72 rounded-full bg-amber/20 blur-3xl" />
@@ -23,7 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="relative space-y-5 px-4 pt-5 pb-32">{children}</div>
 
         {/* bottom nav */}
-        <nav className="fixed bottom-0 left-1/2 w-full max-w-[420px] -translate-x-1/2 px-4 pb-4">
+        <nav className="fixed bottom-0 left-1/2 w-full max-w-[420px] -translate-x-1/2 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between rounded-3xl bg-glass/85 px-3 py-2.5 shadow-lg ring-1 ring-white/70 backdrop-blur-xl">
             {navItems.map((item, i) =>
               "fab" in item && item.fab ? (
