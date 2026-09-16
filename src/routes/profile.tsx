@@ -1,6 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AppShell, SectionTitle } from "@/components/AppShell";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
