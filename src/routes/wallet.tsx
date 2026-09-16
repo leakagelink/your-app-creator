@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { AppShell, SectionTitle } from "@/components/AppShell";
 import { services, workerPayout } from "@/lib/data";
 import { inr, useStore } from "@/lib/store";
@@ -18,9 +19,10 @@ export const Route = createFileRoute("/wallet")({
 });
 
 function WalletPage() {
-  const { bookings, rewardPoints, workers } = useStore();
+  const { bookings, rewardPoints, workers, vouchers, redeemReward } = useStore();
   const paid = bookings.filter((b) => b.payment === "paid");
   const totalSpent = paid.reduce((s, b) => s + b.amount, 0);
+  const canRedeem = rewardPoints >= 100;
 
   return (
     <AppShell>
