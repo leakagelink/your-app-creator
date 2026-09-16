@@ -13,8 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ServicesRouteImport } from './routes/services'
 import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as WorkerPanelRouteImport } from './routes/worker-panel'
+import { Route as ServiceServiceIdRouteImport } from './routes/service.$serviceId'
 import { Route as WorkerWorkerIdRouteImport } from './routes/worker.$workerId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -37,6 +39,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WalletRoute = WalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -45,6 +52,11 @@ const WalletRoute = WalletRouteImport.update({
 const WorkerPanelRoute = WorkerPanelRouteImport.update({
   id: '/worker-panel',
   path: '/worker-panel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServiceServiceIdRoute = ServiceServiceIdRouteImport.update({
+  id: '/service/$serviceId',
+  path: '/service/$serviceId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkerWorkerIdRoute = WorkerWorkerIdRouteImport.update({
@@ -58,8 +70,10 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/bookings': typeof BookingsRoute
   '/profile': typeof ProfileRoute
+  '/services': typeof ServicesRoute
   '/wallet': typeof WalletRoute
   '/worker-panel': typeof WorkerPanelRoute
+  '/service/$serviceId': typeof ServiceServiceIdRoute
   '/worker/$workerId': typeof WorkerWorkerIdRoute
 }
 export interface FileRoutesByTo {
@@ -67,8 +81,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/bookings': typeof BookingsRoute
   '/profile': typeof ProfileRoute
+  '/services': typeof ServicesRoute
   '/wallet': typeof WalletRoute
   '/worker-panel': typeof WorkerPanelRoute
+  '/service/$serviceId': typeof ServiceServiceIdRoute
   '/worker/$workerId': typeof WorkerWorkerIdRoute
 }
 export interface FileRoutesById {
@@ -77,8 +93,10 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/bookings': typeof BookingsRoute
   '/profile': typeof ProfileRoute
+  '/services': typeof ServicesRoute
   '/wallet': typeof WalletRoute
   '/worker-panel': typeof WorkerPanelRoute
+  '/service/$serviceId': typeof ServiceServiceIdRoute
   '/worker/$workerId': typeof WorkerWorkerIdRoute
 }
 export interface FileRouteTypes {
@@ -88,8 +106,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/bookings'
     | '/profile'
+    | '/services'
     | '/wallet'
     | '/worker-panel'
+    | '/service/$serviceId'
     | '/worker/$workerId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -97,8 +117,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/bookings'
     | '/profile'
+    | '/services'
     | '/wallet'
     | '/worker-panel'
+    | '/service/$serviceId'
     | '/worker/$workerId'
   id:
     | '__root__'
@@ -106,8 +128,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/bookings'
     | '/profile'
+    | '/services'
     | '/wallet'
     | '/worker-panel'
+    | '/service/$serviceId'
     | '/worker/$workerId'
   fileRoutesById: FileRoutesById
 }
@@ -116,8 +140,10 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   BookingsRoute: typeof BookingsRoute
   ProfileRoute: typeof ProfileRoute
+  ServicesRoute: typeof ServicesRoute
   WalletRoute: typeof WalletRoute
   WorkerPanelRoute: typeof WorkerPanelRoute
+  ServiceServiceIdRoute: typeof ServiceServiceIdRoute
   WorkerWorkerIdRoute: typeof WorkerWorkerIdRoute
 }
 
@@ -151,6 +177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wallet': {
       id: '/wallet'
       path: '/wallet'
@@ -163,6 +196,13 @@ declare module '@tanstack/react-router' {
       path: '/worker-panel'
       fullPath: '/worker-panel'
       preLoaderRoute: typeof WorkerPanelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/service/$serviceId': {
+      id: '/service/$serviceId'
+      path: '/service/$serviceId'
+      fullPath: '/service/$serviceId'
+      preLoaderRoute: typeof ServiceServiceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/worker/$workerId': {
@@ -180,8 +220,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   BookingsRoute: BookingsRoute,
   ProfileRoute: ProfileRoute,
+  ServicesRoute: ServicesRoute,
   WalletRoute: WalletRoute,
   WorkerPanelRoute: WorkerPanelRoute,
+  ServiceServiceIdRoute: ServiceServiceIdRoute,
   WorkerWorkerIdRoute: WorkerWorkerIdRoute,
 }
 export const routeTree = rootRouteImport
