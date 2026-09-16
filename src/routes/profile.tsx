@@ -18,6 +18,18 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
+  const navigate = useNavigate();
+  const { user, profile, loading, signOut } = useAuth();
+
+  const displayName = profile?.full_name?.trim() || user?.email?.split("@")[0] || "Guest";
+  const initial = displayName.charAt(0).toUpperCase();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Logout ho gaya");
+    navigate({ to: "/auth", replace: true });
+  };
+
   const shareLocation = () => {
     if (!("geolocation" in navigator)) {
       toast.error("Is phone me location support nahi hai");
