@@ -26,8 +26,8 @@ function WorkerBookingPage() {
   const navigate = useNavigate();
   const { workers, commissions, addBooking, payBooking } = useStore();
   const worker = workers.find((w) => w.id === workerId);
-  const [date, setDate] = useState(dates[0]);
-  const [time, setTime] = useState(times[0]);
+  const [date, setDate] = useState<string>(dates[0]!);
+  const [time, setTime] = useState<string>(times[0]!);
   const [address, setAddress] = useState("");
   const [booked, setBooked] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);

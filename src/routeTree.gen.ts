@@ -10,33 +10,79 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BookingsRouteImport } from './routes/bookings'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as WorkerWorkerIdRouteImport } from './routes/worker.$workerId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BookingsRoute = BookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WalletRoute = WalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkerWorkerIdRoute = WorkerWorkerIdRouteImport.update({
+  id: '/worker/$workerId',
+  path: '/worker/$workerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bookings': typeof BookingsRoute
+  '/profile': typeof ProfileRoute
+  '/wallet': typeof WalletRoute
+  '/worker/$workerId': typeof WorkerWorkerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bookings': typeof BookingsRoute
+  '/profile': typeof ProfileRoute
+  '/wallet': typeof WalletRoute
+  '/worker/$workerId': typeof WorkerWorkerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bookings': typeof BookingsRoute
+  '/profile': typeof ProfileRoute
+  '/wallet': typeof WalletRoute
+  '/worker/$workerId': typeof WorkerWorkerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/bookings' | '/profile' | '/wallet' | '/worker/$workerId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/bookings' | '/profile' | '/wallet' | '/worker/$workerId'
+  id:
+    | '__root__'
+    | '/'
+    | '/bookings'
+    | '/profile'
+    | '/wallet'
+    | '/worker/$workerId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BookingsRoute: typeof BookingsRoute
+  ProfileRoute: typeof ProfileRoute
+  WalletRoute: typeof WalletRoute
+  WorkerWorkerIdRoute: typeof WorkerWorkerIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +94,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bookings': {
+      id: '/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof BookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wallet': {
+      id: '/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof WalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/worker/$workerId': {
+      id: '/worker/$workerId'
+      path: '/worker/$workerId'
+      fullPath: '/worker/$workerId'
+      preLoaderRoute: typeof WorkerWorkerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BookingsRoute: BookingsRoute,
+  ProfileRoute: ProfileRoute,
+  WalletRoute: WalletRoute,
+  WorkerWorkerIdRoute: WorkerWorkerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
