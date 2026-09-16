@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Badre Electrician</string>
+    <string name="title_activity_main">Badre Electrician</string>
+    <string name="package_name">com.badre.electrician</string>
+    <string name="custom_url_scheme">com.badre.electrician</string>
+</resources>
