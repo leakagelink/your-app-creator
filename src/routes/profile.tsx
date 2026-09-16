@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { AppShell, SectionTitle } from "@/components/AppShell";
 
 export const Route = createFileRoute("/profile")({
@@ -16,6 +17,29 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
+  const shareLocation = () => {
+    if (!("geolocation" in navigator)) {
+      toast.error("Is phone me location support nahi hai");
+      return;
+    }
+    const id = toast.loading("Location le rahe hain...");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const maps = `https://maps.google.com/?q=${latitude},${longitude}`;
+        toast.success("Location mil gayi — WhatsApp par bhej rahe hain", { id });
+        window.open(
+          `https://wa.me/919999999999?text=${encodeURIComponent(
+            `Meri location: ${maps}`,
+          )}`,
+          "_blank",
+        );
+      },
+      () => toast.error("Location permission nahi mili", { id }),
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
+
   return (
     <AppShell>
       <header className="rise flex items-center gap-3">
@@ -96,17 +120,20 @@ function ProfilePage() {
               <p className="text-[11px] text-ink-soft">Shikayat ya sawaal? Message karein</p>
             </div>
           </a>
-          <div className="flex items-center gap-3 rounded-3xl bg-glass/80 p-4 ring-1 ring-white/60 backdrop-blur-md">
-            <span className="grid size-10 place-items-center rounded-xl bg-amber/15 text-lg">
+          <button
+            onClick={shareLocation}
+            className="flex w-full items-center gap-3 rounded-3xl bg-glass/80 p-4 text-left ring-1 ring-white/60 backdrop-blur-md transition active:scale-[0.98]"
+          >
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-amber/15 text-lg">
               📍
             </span>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-bold">Location bhejein</p>
               <p className="text-[11px] text-ink-soft">
                 Worker ko apna GPS location share karein
               </p>
             </div>
-          </div>
+          </button>
         </div>
       </section>
 

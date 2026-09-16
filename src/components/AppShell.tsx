@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 const navItems = [
   { to: "/", icon: "🏠", label: "Home" },
   { to: "/bookings", icon: "📋", label: "Bookings" },
-  { to: "/", icon: "＋", label: "", fab: true },
+  { to: "/services", icon: "＋", label: "", fab: true },
   { to: "/wallet", icon: "💳", label: "Wallet" },
   { to: "/profile", icon: "👤", label: "Profile" },
 ] as const;
@@ -29,7 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               "fab" in item && item.fab ? (
                 <Link
                   key={i}
-                  to="/"
+                  to="/services"
                   className="-mt-7 grid size-14 place-items-center rounded-full bg-volt text-white shadow-lg ring-4 ring-paper transition active:scale-95"
                   aria-label="Book service"
                 >

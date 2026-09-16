@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import { AppShell, SectionTitle } from "@/components/AppShell";
 import { services, statusLabels, withdrawalLabels } from "@/lib/data";
 import { inr, useStore } from "@/lib/store";
@@ -145,19 +146,39 @@ function AdminPage() {
               <option>SBI ****8834</option>
               <option>UPI: badre@upi</option>
             </select>
-            <input
-              value={withdrawAmt}
-              onChange={(e) => setWithdrawAmt(e.target.value.replace(/\D/g, ""))}
-              placeholder={`Amount (max ${inr(commissionWallet.available)})`}
-              className="mt-2 w-full rounded-2xl bg-ink/5 px-3 py-2.5 font-mono text-sm outline-none placeholder:font-sans placeholder:text-ink-soft/60"
-            />
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                value={withdrawAmt}
+                onChange={(e) => setWithdrawAmt(e.target.value.replace(/\D/g, ""))}
+                inputMode="numeric"
+                placeholder={`Amount (max ${inr(commissionWallet.available)})`}
+                className="min-w-0 flex-1 rounded-2xl bg-ink/5 px-3 py-2.5 font-mono text-sm outline-none placeholder:font-sans placeholder:text-ink-soft/60"
+              />
+              <button
+                onClick={() => setWithdrawAmt(String(commissionWallet.available))}
+                className="shrink-0 rounded-2xl bg-ink px-3.5 py-2.5 text-xs font-bold text-white active:scale-95"
+              >
+                Max
+              </button>
+            </div>
             <button
               onClick={() => {
                 const amt = Number(withdrawAmt);
-                if (amt > 0 && amt <= commissionWallet.available) {
-                  requestWithdrawal(amt, account);
-                  setWithdrawAmt("");
+                if (!amt || amt <= 0) {
+                  toast.error("Pehle amount daalein");
+                  return;
                 }
+                if (amt > commissionWallet.available) {
+                  toast.error("Itna balance available nahi hai", {
+                    description: `Available: ${inr(commissionWallet.available)}`,
+                  });
+                  return;
+                }
+                requestWithdrawal(amt, account);
+                setWithdrawAmt("");
+                toast.success(`${inr(amt)} ki withdrawal request bhej di`, {
+                  description: `${account} me 24-48 ghante me aayega.`,
+                });
               }}
               className="mt-2.5 w-full rounded-2xl bg-volt py-3 text-sm font-bold text-white transition active:scale-[0.98]"
             >
@@ -188,7 +209,10 @@ function AdminPage() {
                     </span>
                     {w.status === "pending" && (
                       <button
-                        onClick={() => setWithdrawalStatus(w.id, "processing")}
+                        onClick={() => {
+                          setWithdrawalStatus(w.id, "processing");
+                          toast.success(`${w.id} processing me daal diya`);
+                        }}
                         className="rounded-full bg-lav/15 px-2 py-0.5 text-[10px] font-bold text-lav"
                       >
                         Process
@@ -196,10 +220,24 @@ function AdminPage() {
                     )}
                     {w.status === "processing" && (
                       <button
-                        onClick={() => setWithdrawalStatus(w.id, "paid")}
+                        onClick={() => {
+                          setWithdrawalStatus(w.id, "paid");
+                          toast.success(`${inr(w.amount)} ${w.account} me bhej diya`);
+                        }}
                         className="rounded-full bg-volt/15 px-2 py-0.5 text-[10px] font-bold text-volt"
                       >
                         Mark paid
+                      </button>
+                    )}
+                    {(w.status === "pending" || w.status === "processing") && (
+                      <button
+                        onClick={() => {
+                          setWithdrawalStatus(w.id, "failed");
+                          toast("Withdrawal cancel kar di — paise wallet me wapas");
+                        }}
+                        className="rounded-full bg-red/10 px-2 py-0.5 text-[10px] font-bold text-red"
+                      >
+                        Cancel
                       </button>
                     )}
                   </div>

@@ -17,9 +17,6 @@ export const Route = createFileRoute("/worker-panel")({
   component: WorkerPanelPage,
 });
 
-// Demo: Suresh Patil (w1) ke taur par login
-const ME = "w1";
-
 const statusColor: Record<string, string> = {
   pending: "bg-amber/15 text-amber",
   accepted: "bg-lav/15 text-lav",
@@ -29,8 +26,17 @@ const statusColor: Record<string, string> = {
 };
 
 function WorkerPanelPage() {
-  const { workers, bookings, setBookingStatus, toggleWorkerAvailable } =
-    useStore();
+  const {
+    workers,
+    bookings,
+    setBookingStatus,
+    toggleWorkerAvailable,
+    currentWorkerId,
+    setCurrentWorker,
+  } = useStore();
+  const ME = workers.some((w) => w.id === currentWorkerId)
+    ? currentWorkerId
+    : workers[0]!.id;
   const me = workers.find((w) => w.id === ME)!;
   const myJobs = bookings.filter((b) => b.workerId === ME);
   const newRequests = myJobs.filter((b) => b.status === "pending");
@@ -57,13 +63,32 @@ function WorkerPanelPage() {
           height={44}
           className="size-11 rounded-2xl object-cover"
         />
-        <div className="flex-1">
-          <h1 className="text-base font-extrabold">{me.name}</h1>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-base font-extrabold">{me.name}</h1>
           <p className="text-[11px] text-ink-soft">
             {me.role} · {me.kyc === "verified" ? "✅ KYC verified" : "⏳ KYC pending"}
           </p>
         </div>
       </header>
+
+      {/* worker switch (demo login) */}
+      <section className="rise rounded-3xl bg-glass/80 p-3 ring-1 ring-white/60 backdrop-blur-md">
+        <label className="text-[11px] font-bold text-ink-soft" htmlFor="worker-select">
+          Worker ke roop me login (demo)
+        </label>
+        <select
+          id="worker-select"
+          value={ME}
+          onChange={(e) => setCurrentWorker(e.target.value)}
+          className="mt-1.5 w-full rounded-2xl bg-ink/5 px-3 py-2.5 text-xs font-semibold outline-none"
+        >
+          {workers.map((w) => (
+            <option key={w.id} value={w.id}>
+              {w.name} — {w.role}
+            </option>
+          ))}
+        </select>
+      </section>
 
       {/* availability */}
       <section className="rise flex items-center justify-between rounded-3xl bg-glass/80 p-4 ring-1 ring-white/60 backdrop-blur-md [animation-delay:60ms]">

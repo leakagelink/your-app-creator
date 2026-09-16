@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { AppShell, SectionTitle } from "@/components/AppShell";
 import { services, workerPayout } from "@/lib/data";
 import { inr, useStore } from "@/lib/store";
@@ -18,9 +19,10 @@ export const Route = createFileRoute("/wallet")({
 });
 
 function WalletPage() {
-  const { bookings, rewardPoints, workers } = useStore();
+  const { bookings, rewardPoints, workers, vouchers, redeemReward } = useStore();
   const paid = bookings.filter((b) => b.payment === "paid");
   const totalSpent = paid.reduce((s, b) => s + b.amount, 0);
+  const canRedeem = rewardPoints >= 100;
 
   return (
     <AppShell>
@@ -45,11 +47,53 @@ function WalletPage() {
         </div>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-amber"
-            style={{ width: `${Math.min(100, rewardPoints % 100)}%` }}
+            className="h-full rounded-full bg-amber transition-all"
+            style={{ width: `${canRedeem ? 100 : rewardPoints % 100}%` }}
           />
         </div>
+        <button
+          disabled={!canRedeem}
+          onClick={() => {
+            const v = redeemReward();
+            if (v)
+              toast.success(`₹${v.value} ka voucher mil gaya!`, {
+                description: `Code: ${v.code}`,
+              });
+          }}
+          className="mt-3 w-full rounded-full bg-amber py-2.5 text-xs font-bold text-ink transition active:scale-95 disabled:bg-white/10 disabled:text-white/40"
+        >
+          {canRedeem
+            ? "100 points redeem karein → ₹50 voucher"
+            : `${100 - (rewardPoints % 100)} points aur chahiye`}
+        </button>
       </section>
+
+      {vouchers.length > 0 && (
+        <section className="rise [animation-delay:90ms]">
+          <SectionTitle tag={`${vouchers.length}`}>Mere vouchers</SectionTitle>
+          <div className="space-y-2">
+            {vouchers.map((v) => (
+              <div
+                key={v.id}
+                className="flex items-center gap-3 rounded-2xl bg-glass/80 p-3 ring-1 ring-white/60 backdrop-blur-md"
+              >
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-amber/15 text-lg">
+                  🎟️
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold">{inr(v.value)} gift voucher</p>
+                  <p className="font-mono text-[11px] text-ink-soft">
+                    {v.code} · {v.date}
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-full bg-volt/15 px-2 py-1 text-[10px] font-bold text-volt">
+                  Active
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* spend summary */}
       <section className="rise grid grid-cols-2 gap-2.5 [animation-delay:120ms]">
