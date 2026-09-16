@@ -94,7 +94,8 @@ function HomePage() {
           {services.map((s) => (
             <Link
               key={s.id}
-              to="/"
+              to="/service/$serviceId"
+              params={{ serviceId: s.id }}
               className="rounded-2xl bg-glass/75 p-3 text-center ring-1 ring-white/60 backdrop-blur-md transition active:scale-95"
             >
               <div
@@ -105,12 +106,15 @@ function HomePage() {
               <p className="text-[11px] leading-tight font-semibold">{s.name}</p>
             </Link>
           ))}
-          <div className="rounded-2xl bg-ink p-3 text-center text-white">
+          <Link
+            to="/services"
+            className="rounded-2xl bg-ink p-3 text-center text-white transition active:scale-95"
+          >
             <div className="mx-auto mb-1.5 grid size-10 place-items-center rounded-xl bg-white/10 text-lg">
               ➕
             </div>
             <p className="text-[11px] leading-tight font-semibold">Sab dekho</p>
-          </div>
+          </Link>
         </div>
       </section>
 
