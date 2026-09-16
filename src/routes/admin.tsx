@@ -209,7 +209,10 @@ function AdminPage() {
                     </span>
                     {w.status === "pending" && (
                       <button
-                        onClick={() => setWithdrawalStatus(w.id, "processing")}
+                        onClick={() => {
+                          setWithdrawalStatus(w.id, "processing");
+                          toast.success(`${w.id} processing me daal diya`);
+                        }}
                         className="rounded-full bg-lav/15 px-2 py-0.5 text-[10px] font-bold text-lav"
                       >
                         Process
@@ -217,10 +220,24 @@ function AdminPage() {
                     )}
                     {w.status === "processing" && (
                       <button
-                        onClick={() => setWithdrawalStatus(w.id, "paid")}
+                        onClick={() => {
+                          setWithdrawalStatus(w.id, "paid");
+                          toast.success(`${inr(w.amount)} ${w.account} me bhej diya`);
+                        }}
                         className="rounded-full bg-volt/15 px-2 py-0.5 text-[10px] font-bold text-volt"
                       >
                         Mark paid
+                      </button>
+                    )}
+                    {(w.status === "pending" || w.status === "processing") && (
+                      <button
+                        onClick={() => {
+                          setWithdrawalStatus(w.id, "failed");
+                          toast("Withdrawal cancel kar di — paise wallet me wapas");
+                        }}
+                        className="rounded-full bg-red/10 px-2 py-0.5 text-[10px] font-bold text-red"
+                      >
+                        Cancel
                       </button>
                     )}
                   </div>
