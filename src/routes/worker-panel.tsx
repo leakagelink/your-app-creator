@@ -17,9 +17,6 @@ export const Route = createFileRoute("/worker-panel")({
   component: WorkerPanelPage,
 });
 
-// Demo: Suresh Patil (w1) ke taur par login
-const ME = "w1";
-
 const statusColor: Record<string, string> = {
   pending: "bg-amber/15 text-amber",
   accepted: "bg-lav/15 text-lav",
@@ -29,8 +26,17 @@ const statusColor: Record<string, string> = {
 };
 
 function WorkerPanelPage() {
-  const { workers, bookings, setBookingStatus, toggleWorkerAvailable } =
-    useStore();
+  const {
+    workers,
+    bookings,
+    setBookingStatus,
+    toggleWorkerAvailable,
+    currentWorkerId,
+    setCurrentWorker,
+  } = useStore();
+  const ME = workers.some((w) => w.id === currentWorkerId)
+    ? currentWorkerId
+    : workers[0]!.id;
   const me = workers.find((w) => w.id === ME)!;
   const myJobs = bookings.filter((b) => b.workerId === ME);
   const newRequests = myJobs.filter((b) => b.status === "pending");
