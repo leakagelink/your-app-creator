@@ -12,4 +12,10 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Make sure local builds always write to .output/public so Capacitor webDir matches.
+  nitro: {
+    output: {
+      dir: ".output",
+    },
+  },
 });
