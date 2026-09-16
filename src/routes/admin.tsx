@@ -145,19 +145,39 @@ function AdminPage() {
               <option>SBI ****8834</option>
               <option>UPI: badre@upi</option>
             </select>
-            <input
-              value={withdrawAmt}
-              onChange={(e) => setWithdrawAmt(e.target.value.replace(/\D/g, ""))}
-              placeholder={`Amount (max ${inr(commissionWallet.available)})`}
-              className="mt-2 w-full rounded-2xl bg-ink/5 px-3 py-2.5 font-mono text-sm outline-none placeholder:font-sans placeholder:text-ink-soft/60"
-            />
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                value={withdrawAmt}
+                onChange={(e) => setWithdrawAmt(e.target.value.replace(/\D/g, ""))}
+                inputMode="numeric"
+                placeholder={`Amount (max ${inr(commissionWallet.available)})`}
+                className="min-w-0 flex-1 rounded-2xl bg-ink/5 px-3 py-2.5 font-mono text-sm outline-none placeholder:font-sans placeholder:text-ink-soft/60"
+              />
+              <button
+                onClick={() => setWithdrawAmt(String(commissionWallet.available))}
+                className="shrink-0 rounded-2xl bg-ink px-3.5 py-2.5 text-xs font-bold text-white active:scale-95"
+              >
+                Max
+              </button>
+            </div>
             <button
               onClick={() => {
                 const amt = Number(withdrawAmt);
-                if (amt > 0 && amt <= commissionWallet.available) {
-                  requestWithdrawal(amt, account);
-                  setWithdrawAmt("");
+                if (!amt || amt <= 0) {
+                  toast.error("Pehle amount daalein");
+                  return;
                 }
+                if (amt > commissionWallet.available) {
+                  toast.error("Itna balance available nahi hai", {
+                    description: `Available: ${inr(commissionWallet.available)}`,
+                  });
+                  return;
+                }
+                requestWithdrawal(amt, account);
+                setWithdrawAmt("");
+                toast.success(`${inr(amt)} ki withdrawal request bhej di`, {
+                  description: `${account} me 24-48 ghante me aayega.`,
+                });
               }}
               className="mt-2.5 w-full rounded-2xl bg-volt py-3 text-sm font-bold text-white transition active:scale-[0.98]"
             >
