@@ -16,11 +16,22 @@ import {
   type Worker,
 } from "./data";
 
+export type Voucher = {
+  id: string;
+  points: number;
+  value: number;
+  code: string;
+  date: string;
+};
+
 type StoreState = {
   workers: Worker[];
   bookings: Booking[];
   withdrawals: Withdrawal[];
   rewardPoints: number;
+  ratings: Record<string, number>;
+  vouchers: Voucher[];
+  currentWorkerId: string;
 };
 
 const seedBookings: Booking[] = [
@@ -66,6 +77,9 @@ const initialState: StoreState = {
   bookings: seedBookings,
   withdrawals: seedWithdrawals,
   rewardPoints: 120,
+  ratings: {},
+  vouchers: [],
+  currentWorkerId: "w1",
 };
 
 const STORAGE_KEY = "badre-store-v1";
@@ -76,12 +90,16 @@ type StoreContextValue = StoreState & {
   setBookingStatus: (id: string, status: BookingStatus) => void;
   payBooking: (id: string) => void;
   cancelBooking: (id: string) => void;
+  rateBooking: (id: string, stars: number) => void;
+  redeemReward: () => Voucher | null;
   toggleWorkerAvailable: (id: string) => void;
   verifyKyc: (id: string) => void;
+  setCurrentWorker: (id: string) => void;
   updateServiceCommission: (serviceId: string, commission: number) => void;
   commissions: Record<string, number>;
   requestWithdrawal: (amount: number, account: string) => void;
   setWithdrawalStatus: (id: string, status: WithdrawalStatus) => void;
+  resetDemoData: () => void;
 };
 
 const StoreContext = createContext<StoreContextValue | null>(null);
@@ -99,7 +117,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed.state) setState({ ...initialState, ...parsed.state });
-        if (parsed.commissions) setCommissions(parsed.commissions);
+        if (parsed.commissions)
+          setCommissions((c) => ({ ...c, ...parsed.commissions }));
       }
     } catch {
       /* ignore */
@@ -152,13 +171,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           bookings: s.bookings.map((b) => (b.id === id ? { ...b, status } : b)),
         })),
       payBooking: (id) =>
-        setState((s) => ({
-          ...s,
-          rewardPoints: s.rewardPoints + 10,
-          bookings: s.bookings.map((b) =>
-            b.id === id ? { ...b, payment: "paid" as const } : b,
-          ),
-        })),
+        setState((s) => {
+          const target = s.bookings.find((b) => b.id === id);
+          if (!target || target.payment === "paid") return s;
+          return {
+            ...s,
+            rewardPoints: s.rewardPoints + 10,
+            bookings: s.bookings.map((b) =>
+              b.id === id ? { ...b, payment: "paid" as const } : b,
+            ),
+          };
+        }),
       cancelBooking: (id) =>
         setState((s) => ({
           ...s,
@@ -168,6 +191,24 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               : b,
           ),
         })),
+      rateBooking: (id, stars) =>
+        setState((s) => ({ ...s, ratings: { ...s.ratings, [id]: stars } })),
+      redeemReward: () => {
+        if (state.rewardPoints < 100) return null;
+        const voucher: Voucher = {
+          id: `VC-${state.vouchers.length + 1}`,
+          points: 100,
+          value: 50,
+          code: `BADRE${Math.floor(1000 + Math.random() * 9000)}`,
+          date: new Date().toISOString().slice(0, 10),
+        };
+        setState((s) => ({
+          ...s,
+          rewardPoints: Math.max(0, s.rewardPoints - 100),
+          vouchers: [voucher, ...s.vouchers],
+        }));
+        return voucher;
+      },
       toggleWorkerAvailable: (id) =>
         setState((s) => ({
           ...s,
@@ -182,6 +223,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             w.id === id ? { ...w, kyc: "verified" as const } : w,
           ),
         })),
+      setCurrentWorker: (id) => setState((s) => ({ ...s, currentWorkerId: id })),
       updateServiceCommission: (serviceId, commission) =>
         setCommissions((c) => ({ ...c, [serviceId]: commission })),
       requestWithdrawal: (amount, account) =>
@@ -205,6 +247,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             w.id === id ? { ...w, status } : w,
           ),
         })),
+      resetDemoData: () => {
+        setState(initialState);
+        setCommissions(Object.fromEntries(services.map((s) => [s.id, s.commission])));
+      },
     };
   }, [state, commissions]);
 
