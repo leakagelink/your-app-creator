@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { services, statusLabels } from "@/lib/data";
 import { inr, useStore } from "@/lib/store";
@@ -26,7 +28,9 @@ const statusColor: Record<string, string> = {
 };
 
 function BookingsPage() {
-  const { bookings, workers, cancelBooking, payBooking } = useStore();
+  const { bookings, workers, cancelBooking, payBooking, rateBooking, ratings } =
+    useStore();
+  const [rateFor, setRateFor] = useState<string | null>(null);
 
   return (
     <AppShell>
