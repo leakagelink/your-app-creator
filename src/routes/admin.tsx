@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell, SectionTitle } from "@/components/AppShell";
+import { AdminGate } from "@/components/AdminGate";
 import { services, statusLabels, withdrawalLabels } from "@/lib/data";
 import { inr, useStore } from "@/lib/store";
 
@@ -16,8 +17,17 @@ export const Route = createFileRoute("/admin")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: AdminPage,
+  ssr: false,
+  component: AdminRoute,
 });
+
+function AdminRoute() {
+  return (
+    <AdminGate>
+      <AdminPage />
+    </AdminGate>
+  );
+}
 
 const wStatusColor: Record<string, string> = {
   pending: "bg-amber/15 text-amber",
