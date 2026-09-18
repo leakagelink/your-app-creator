@@ -17,8 +17,17 @@ export const Route = createFileRoute("/admin")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: AdminPage,
+  ssr: false,
+  component: AdminRoute,
 });
+
+function AdminRoute() {
+  return (
+    <AdminGate>
+      <AdminPage />
+    </AdminGate>
+  );
+}
 
 const wStatusColor: Record<string, string> = {
   pending: "bg-amber/15 text-amber",
