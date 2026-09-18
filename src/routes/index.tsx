@@ -19,7 +19,16 @@ export const Route = createFileRoute("/")({
         content: "Ghar ke liye trusted service — 30 min mein local expert.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:site_name", content: "Badre Electrician Service" },
+      {
+        property: "og:image",
+        content: "https://badreelectricianservice.online/og-badre.jpg",
+      },
+      { name: "twitter:card", content: "summary_large_image" },
+      {
+        name: "twitter:image",
+        content: "https://badreelectricianservice.online/og-badre.jpg",
+      },
     ],
   }),
   component: HomePage,
