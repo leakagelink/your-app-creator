@@ -7,7 +7,7 @@ import { inr, useStore } from "@/lib/store";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Badre Electrician Service — Ghar ka kaam, abhi" },
+      { title: "Badre Electrician Service — होम सर्विस" },
       {
         name: "description",
         content:
@@ -61,7 +61,7 @@ function HomePage() {
           <span className="text-lg">⚡</span>
           <div>
             <p className="text-[11px] text-white/60">Badre Electrician Service</p>
-            <p className="text-sm font-bold">Ghar ka kaam, abhi.</p>
+            <p className="text-sm font-bold">होम सर्विस</p>
           </div>
         </div>
         <span className="rounded-full bg-volt/20 px-2.5 py-1 text-[11px] font-semibold text-volt">
@@ -73,9 +73,9 @@ function HomePage() {
       <div className="rise flex items-end justify-between [animation-delay:120ms]">
         <div>
           <h1 className="font-display text-[2rem] leading-[0.95] tracking-tight">
-            Ghar ka
+            होम
             <br />
-            kaam, abhi.
+            सर्विस
           </h1>
           <p className="mt-1.5 text-sm text-ink-soft">
             Trusted local experts — 30 min mein.
