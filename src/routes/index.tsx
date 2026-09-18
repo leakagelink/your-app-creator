@@ -39,9 +39,7 @@ function HomePage() {
       {/* header */}
       <header className="rise flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="grid size-11 place-items-center rounded-2xl bg-ink font-display text-xl text-amber shadow-sm">
-            B
-          </div>
+          <Logo className="size-11" />
           <div>
             <p className="text-[11px] font-medium text-ink-soft">Namaste,</p>
             <p className="text-base leading-none font-extrabold">Rohan Kumar</p>

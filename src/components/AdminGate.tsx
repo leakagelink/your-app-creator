@@ -71,9 +71,7 @@ export function AdminGate({ children }: { children: ReactNode }) {
   return (
     <AppShell>
       <header className="rise mt-6 text-center">
-        <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-ink font-display text-2xl text-amber">
-          👑
-        </div>
+        <Logo className="mx-auto size-14" />
         <h1 className="mt-3 text-lg font-extrabold">Admin Login</h1>
         <p className="mt-1 text-xs text-ink-soft">
           Admin panel sirf malik ke account se khulta hai

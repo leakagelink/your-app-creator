@@ -104,9 +104,7 @@ function AuthPage() {
   return (
     <AppShell>
       <header className="rise text-center">
-        <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-ink font-display text-2xl text-amber">
-          B
-        </div>
+        <Logo className="mx-auto size-14" />
         <h1 className="mt-3 text-lg font-extrabold">
           {mode === "login" ? "Login karein" : "Naya account banayein"}
         </h1>
