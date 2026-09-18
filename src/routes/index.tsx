@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, SectionTitle } from "@/components/AppShell";
+import { Logo } from "@/components/Logo";
 import { services } from "@/lib/data";
 import { inr, useStore } from "@/lib/store";
 
