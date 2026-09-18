@@ -98,7 +98,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Badre Electrician Service" },
       {
         property: "og:description",
-        content: "Ghar ka kaam, abhi — trusted local experts.",
+        content: "होम सर्विस — trusted local experts.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
