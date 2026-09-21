@@ -29,6 +29,68 @@ export type Database = {
         }
         Relationships: []
       }
+      bookings: {
+        Row: {
+          address: string
+          amount: number
+          booking_date: string
+          booking_time: string
+          code: string
+          commission: number
+          created_at: string
+          customer_name: string
+          customer_phone: string
+          payment: string
+          rating: number | null
+          service_id: string
+          status: string
+          user_id: string
+          worker_id: string
+        }
+        Insert: {
+          address: string
+          amount: number
+          booking_date: string
+          booking_time: string
+          code?: string
+          commission: number
+          created_at?: string
+          customer_name: string
+          customer_phone?: string
+          payment?: string
+          rating?: number | null
+          service_id: string
+          status?: string
+          user_id: string
+          worker_id: string
+        }
+        Update: {
+          address?: string
+          amount?: number
+          booking_date?: string
+          booking_time?: string
+          code?: string
+          commission?: number
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string
+          payment?: string
+          rating?: number | null
+          service_id?: string
+          status?: string
+          user_id?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           city: string | null
@@ -36,6 +98,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          reward_points: number
           updated_at: string
         }
         Insert: {
@@ -44,6 +107,7 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          reward_points?: number
           updated_at?: string
         }
         Update: {
@@ -52,6 +116,25 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          reward_points?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      service_commissions: {
+        Row: {
+          commission: number
+          service_id: string
+          updated_at: string
+        }
+        Insert: {
+          commission: number
+          service_id: string
+          updated_at?: string
+        }
+        Update: {
+          commission?: number
+          service_id?: string
           updated_at?: string
         }
         Relationships: []
@@ -77,17 +160,137 @@ export type Database = {
         }
         Relationships: []
       }
+      vouchers: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          points: number
+          user_id: string
+          value: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          points: number
+          user_id: string
+          value: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          points?: number
+          user_id?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      withdrawals: {
+        Row: {
+          account: string
+          amount: number
+          code: string
+          created_at: string
+          requested_on: string
+          status: string
+        }
+        Insert: {
+          account: string
+          amount: number
+          code?: string
+          created_at?: string
+          requested_on?: string
+          status?: string
+        }
+        Update: {
+          account?: string
+          amount?: number
+          code?: string
+          created_at?: string
+          requested_on?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      workers: {
+        Row: {
+          available: boolean
+          created_at: string
+          distance_km: number
+          exp_years: number
+          id: string
+          jobs_done: number
+          kyc: string
+          name: string
+          photo: string
+          rating: number
+          role: string
+          service_id: string
+          user_id: string | null
+        }
+        Insert: {
+          available?: boolean
+          created_at?: string
+          distance_km?: number
+          exp_years?: number
+          id: string
+          jobs_done?: number
+          kyc?: string
+          name: string
+          photo?: string
+          rating?: number
+          role: string
+          service_id: string
+          user_id?: string | null
+        }
+        Update: {
+          available?: boolean
+          created_at?: string
+          distance_km?: number
+          exp_years?: number
+          id?: string
+          jobs_done?: number
+          kyc?: string
+          name?: string
+          photo?: string
+          rating?: number
+          role?: string
+          service_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      add_reward_points: { Args: { _points: number }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      redeem_reward_points: {
+        Args: never
+        Returns: {
+          code: string
+          created_at: string
+          id: string
+          points: number
+          user_id: string
+          value: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "vouchers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
