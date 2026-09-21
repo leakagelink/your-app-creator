@@ -212,7 +212,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .filter((w) => w.status === "pending" || w.status === "processing")
       .reduce((s, w) => s + w.amount, 0);
 
-    const updateBooking = async (id: string, patch: Record<string, unknown>) => {
+    type BookingPatch = {
+      status?: string;
+      payment?: string;
+      rating?: number;
+    };
+    const updateBooking = async (id: string, patch: BookingPatch) => {
       await supabase.from("bookings").update(patch).eq("code", id);
       await refresh();
     };

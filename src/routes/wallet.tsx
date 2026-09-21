@@ -53,12 +53,13 @@ function WalletPage() {
         </div>
         <button
           disabled={!canRedeem}
-          onClick={() => {
-            const v = redeemReward();
+          onClick={async () => {
+            const v = await redeemReward();
             if (v)
               toast.success(`₹${v.value} ka voucher mil gaya!`, {
                 description: `Code: ${v.code}`,
               });
+            else toast.error("Voucher nahi ban paya — dobara koshish karein");
           }}
           className="mt-3 w-full rounded-full bg-amber py-2.5 text-xs font-bold text-ink transition active:scale-95 disabled:bg-white/10 disabled:text-white/40"
         >

@@ -44,10 +44,16 @@ function WorkerBookingPage() {
   const commission = commissions[service.id] ?? service.commission;
   const amount = service.price;
 
-  const handleBook = () => {
-    const b = addBooking({
-      customerName: "Rohan Kumar",
-      customerPhone: "98xxxxxx21",
+  const handleBook = async () => {
+    if (!user) {
+      toast.error("Booking ke liye pehle login karein");
+      navigate({ to: "/auth" });
+      return;
+    }
+    setBusy(true);
+    const b = await addBooking({
+      customerName: profile?.full_name || user.email || "Customer",
+      customerPhone: profile?.phone || "",
       workerId: worker.id,
       serviceId: service.id,
       amount,
@@ -56,7 +62,13 @@ function WorkerBookingPage() {
       time,
       address: address || "Pune (GPS location)",
     });
+    setBusy(false);
+    if (!b) {
+      toast.error("Booking save nahi hui — dobara koshish karein");
+      return;
+    }
     setBooked(b.id);
+    toast.success("Booking ho gayi");
   };
 
   const handlePay = () => {

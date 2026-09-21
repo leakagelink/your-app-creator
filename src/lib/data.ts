@@ -35,13 +35,11 @@ export type Worker = {
   kyc: "pending" | "verified";
 };
 
-export const initialWorkers: Worker[] = [
-  { id: "w1", name: "Suresh Patil", serviceId: "electrician", role: "Electrician", expYears: 7, rating: 4.8, jobsDone: 132, distanceKm: 2.1, img: workerSuresh, available: true, kyc: "verified" },
-  { id: "w2", name: "Imran Shaikh", serviceId: "plumber", role: "Plumber", expYears: 5, rating: 4.9, jobsDone: 86, distanceKm: 1.4, img: workerImran, available: true, kyc: "verified" },
-  { id: "w3", name: "Vikram Singh", serviceId: "ac", role: "AC Mechanic", expYears: 9, rating: 4.7, jobsDone: 203, distanceKm: 3.0, img: workerVikram, available: true, kyc: "pending" },
-  { id: "w4", name: "Ramesh Verma", serviceId: "electrician", role: "Electrician", expYears: 4, rating: 4.6, jobsDone: 54, distanceKm: 3.8, img: workerSuresh, available: false, kyc: "pending" },
-  { id: "w5", name: "Anil Gupta", serviceId: "ac", role: "AC Mechanic", expYears: 6, rating: 4.5, jobsDone: 71, distanceKm: 4.2, img: workerVikram, available: true, kyc: "verified" },
-];
+export const workerPhotos: Record<string, string> = {
+  suresh: workerSuresh,
+  imran: workerImran,
+  vikram: workerVikram,
+};
 
 export type BookingStatus =
   | "pending"
