@@ -36,8 +36,17 @@ function WorkerPanelPage() {
   } = useStore();
   const ME = workers.some((w) => w.id === currentWorkerId)
     ? currentWorkerId
-    : workers[0]!.id;
-  const me = workers.find((w) => w.id === ME)!;
+    : (workers[0]?.id ?? "");
+  const me = workers.find((w) => w.id === ME);
+  if (!me) {
+    return (
+      <AppShell>
+        <p className="pt-10 text-center text-sm text-ink-soft">
+          Worker list load ho rahi hai...
+        </p>
+      </AppShell>
+    );
+  }
   const myJobs = bookings.filter((b) => b.workerId === ME);
   const newRequests = myJobs.filter((b) => b.status === "pending");
   const earned = myJobs
