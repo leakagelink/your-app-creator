@@ -15,6 +15,13 @@
       "when": 1789719891127,
       "tag": "0001_admin_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789998953360,
+      "tag": "0002_app_backend_tables",
+      "breakpoints": true
     }
   ]
 }
