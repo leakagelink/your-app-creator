@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import { AppShell, SectionTitle } from "@/components/AppShell";
 import { services } from "@/lib/data";
+import { useAuth } from "@/lib/auth";
 import { inr, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/worker/$workerId")({
@@ -25,12 +27,15 @@ function WorkerBookingPage() {
   const { workerId } = Route.useParams();
   const navigate = useNavigate();
   const { workers, commissions, addBooking, payBooking } = useStore();
+  const { user, profile } = useAuth();
   const worker = workers.find((w) => w.id === workerId);
   const [date, setDate] = useState<string>(dates[0]!);
   const [time, setTime] = useState<string>(times[0]!);
   const [address, setAddress] = useState("");
   const [booked, setBooked] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);
+  const [busy, setBusy] = useState(false);
+
 
   if (!worker) {
     return (
