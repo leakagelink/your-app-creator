@@ -29,6 +29,13 @@
       "when": 1790004095933,
       "tag": "0003_tighten_function_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790005165488,
+      "tag": "0004_real_data_only_services_and_safe_actions",
+      "breakpoints": true
     }
   ]
 }
