@@ -76,11 +76,12 @@ function WorkerBookingPage() {
     toast.success("Booking ho gayi");
   };
 
-  const handlePay = () => {
-    if (booked) {
-      payBooking(booked);
-      setPaid(true);
-    }
+  const handlePay = async () => {
+    if (!booked) return;
+    setBusy(true);
+    await payBooking(booked);
+    setBusy(false);
+    setPaid(true);
   };
 
   return (
