@@ -36,6 +36,13 @@
       "when": 1790005165488,
       "tag": "0004_real_data_only_services_and_safe_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790005220194,
+      "tag": "0005_admin_worker_verification",
+      "breakpoints": true
     }
   ]
 }

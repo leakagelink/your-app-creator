@@ -337,6 +337,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_set_worker_kyc: {
+        Args: { _kyc: string; _worker_id: string }
+        Returns: undefined
+      }
       cancel_own_booking: { Args: { _code: string }; Returns: undefined }
       create_booking: {
         Args: {
