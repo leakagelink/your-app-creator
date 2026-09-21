@@ -9,343 +9,194 @@ import {
 } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import {
-  services,
-  workerPhotos,
-  type Booking,
-  type BookingStatus,
-  type Withdrawal,
-  type WithdrawalStatus,
-  type Worker,
+import type {
+  Booking,
+  BookingStatus,
+  Service,
+  Withdrawal,
+  WithdrawalStatus,
+  Worker,
 } from "./data";
 
-export type Voucher = {
-  id: string;
-  points: number;
-  value: number;
-  code: string;
-  date: string;
-};
+export type Voucher = { id: string; points: number; value: number; code: string; date: string };
 
 type StoreContextValue = {
   loading: boolean;
+  error: string | null;
+  services: Service[];
   workers: Worker[];
   bookings: Booking[];
   withdrawals: Withdrawal[];
   rewardPoints: number;
   ratings: Record<string, number>;
   vouchers: Voucher[];
-  currentWorkerId: string;
-  commissions: Record<string, number>;
+  currentWorker: Worker | null;
   commissionWallet: { total: number; withdrawn: number; pending: number; available: number };
   refresh: () => Promise<void>;
-  addBooking: (
-    b: Omit<Booking, "id" | "createdAt" | "status" | "payment">,
-  ) => Promise<Booking | null>;
-  setBookingStatus: (id: string, status: BookingStatus) => Promise<void>;
-  payBooking: (id: string) => Promise<void>;
-  cancelBooking: (id: string) => Promise<void>;
-  rateBooking: (id: string, stars: number) => Promise<void>;
+  addBooking: (b: { workerId: string; date: string; time: string; address: string }) => Promise<Booking | null>;
+  setBookingStatus: (id: string, status: BookingStatus) => Promise<boolean>;
+  cancelBooking: (id: string) => Promise<boolean>;
+  rateBooking: (id: string, stars: number) => Promise<boolean>;
   redeemReward: () => Promise<Voucher | null>;
-  toggleWorkerAvailable: (id: string) => Promise<void>;
-  verifyKyc: (id: string) => Promise<void>;
-  setCurrentWorker: (id: string) => void;
-  updateServiceCommission: (serviceId: string, commission: number) => Promise<void>;
-  requestWithdrawal: (amount: number, account: string) => Promise<void>;
-  setWithdrawalStatus: (id: string, status: WithdrawalStatus) => Promise<void>;
+  toggleWorkerAvailable: (id: string) => Promise<boolean>;
+  verifyKyc: (id: string) => Promise<boolean>;
+  updateService: (id: string, price: number | null, commission: number | null, status: Service["status"]) => Promise<boolean>;
+  addWorker: (input: { email: string; name: string; serviceId: string; expYears: number; photo: string }) => Promise<string | null>;
+  requestWithdrawal: (amount: number, account: string) => Promise<boolean>;
+  setWithdrawalStatus: (id: string, status: WithdrawalStatus) => Promise<boolean>;
 };
 
 const StoreContext = createContext<StoreContextValue | null>(null);
 
-type WorkerRow = {
-  id: string;
-  name: string;
-  service_id: string;
-  role: string;
-  exp_years: number;
-  rating: number | string;
-  jobs_done: number;
-  distance_km: number | string;
-  photo: string;
-  available: boolean;
-  kyc: string;
-};
+type WorkerRow = { id: string; user_id: string | null; name: string; service_id: string; role: string; exp_years: number; rating: number | string; jobs_done: number; distance_km: number | string; photo: string; available: boolean; kyc: string };
+type BookingRow = { code: string; customer_name: string; customer_phone: string; worker_id: string; service_id: string; amount: number; commission: number; booking_date: string; booking_time: string; address: string; status: string; payment: string; rating: number | null; created_at: string };
+type WithdrawalRow = { code: string; amount: number; status: string; account: string; requested_on: string };
 
-type BookingRow = {
-  code: string;
-  customer_name: string;
-  customer_phone: string;
-  worker_id: string;
-  service_id: string;
-  amount: number;
-  commission: number;
-  booking_date: string;
-  booking_time: string;
-  address: string;
-  status: string;
-  payment: string;
-  rating: number | null;
-  created_at: string;
-};
-
-type WithdrawalRow = {
-  code: string;
-  amount: number;
-  status: string;
-  account: string;
-  requested_on: string;
-};
-
-function mapWorker(r: WorkerRow): Worker {
-  return {
-    id: r.id,
-    name: r.name,
-    serviceId: r.service_id,
-    role: r.role,
-    expYears: r.exp_years,
-    rating: Number(r.rating),
-    jobsDone: r.jobs_done,
-    distanceKm: Number(r.distance_km),
-    img: workerPhotos[r.photo] ?? workerPhotos["suresh"]!,
-    available: r.available,
-    kyc: r.kyc === "verified" ? "verified" : "pending",
-  };
-}
-
-function mapBooking(r: BookingRow): Booking {
-  return {
-    id: r.code,
-    customerName: r.customer_name,
-    customerPhone: r.customer_phone,
-    workerId: r.worker_id,
-    serviceId: r.service_id,
-    amount: r.amount,
-    commission: r.commission,
-    date: r.booking_date,
-    time: r.booking_time,
-    address: r.address,
-    status: r.status as BookingStatus,
-    payment: r.payment as Booking["payment"],
-    createdAt: new Date(r.created_at).getTime(),
-  };
-}
-
-function mapWithdrawal(r: WithdrawalRow): Withdrawal {
-  return {
-    id: r.code,
-    amount: r.amount,
-    status: r.status as WithdrawalStatus,
-    date: r.requested_on,
-    account: r.account,
-  };
-}
+const mapService = (r: { id: string; name: string; icon: string; tint: string; price: number | null; commission: number | null; status: string }): Service => ({
+  id: r.id, name: r.name, icon: r.icon, tint: (r.tint === "lav" || r.tint === "volt" ? r.tint : "amber"), price: r.price, commission: r.commission, status: r.status === "active" ? "active" : "coming_soon",
+});
+const mapWorker = (r: WorkerRow): Worker => ({
+  id: r.id, userId: r.user_id, name: r.name, serviceId: r.service_id, role: r.role,
+  expYears: r.exp_years, rating: Number(r.rating), jobsDone: r.jobs_done,
+  distanceKm: Number(r.distance_km), img: r.photo.trim() || null, available: r.available,
+  kyc: r.kyc === "verified" ? "verified" : "pending",
+});
+const mapBooking = (r: BookingRow): Booking => ({
+  id: r.code, customerName: r.customer_name, customerPhone: r.customer_phone,
+  workerId: r.worker_id, serviceId: r.service_id, amount: r.amount, commission: r.commission,
+  date: r.booking_date, time: r.booking_time, address: r.address,
+  status: r.status as BookingStatus, payment: r.payment as Booking["payment"],
+  createdAt: new Date(r.created_at).getTime(),
+});
+const mapWithdrawal = (r: WithdrawalRow): Withdrawal => ({ id: r.code, amount: r.amount, status: r.status as WithdrawalStatus, date: r.requested_on, account: r.account });
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, isAdmin, refreshProfile } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({});
-  const [commissions, setCommissions] = useState<Record<string, number>>(() =>
-    Object.fromEntries(services.map((s) => [s.id, s.commission])),
-  );
-  const [currentWorkerId, setCurrentWorkerId] = useState("w1");
 
   const refresh = useCallback(async () => {
-    const [w, c] = await Promise.all([
-      supabase.from("workers").select("*").order("created_at", { ascending: true }),
-      supabase.from("service_commissions").select("service_id, commission"),
+    setLoading(true);
+    const [serviceResult, workerResult] = await Promise.all([
+      supabase.from("services").select("*").order("created_at"),
+      supabase.from("workers").select("*").order("created_at"),
     ]);
-    setWorkers(((w.data ?? []) as unknown as WorkerRow[]).map(mapWorker));
-    if (c.data?.length) {
-      setCommissions((prev) => ({
-        ...prev,
-        ...Object.fromEntries(c.data.map((r) => [r.service_id, r.commission])),
-      }));
-    }
-
+    const publicError = serviceResult.error ?? workerResult.error;
+    setServices((serviceResult.data ?? []).map(mapService));
+    setWorkers(((workerResult.data ?? []) as WorkerRow[]).map(mapWorker));
     if (user) {
-      const [b, wd, v] = await Promise.all([
+      const [bookingResult, withdrawalResult, voucherResult] = await Promise.all([
         supabase.from("bookings").select("*").order("created_at", { ascending: false }),
         supabase.from("withdrawals").select("*").order("created_at", { ascending: false }),
         supabase.from("vouchers").select("*").order("created_at", { ascending: false }),
       ]);
-      const rows = (b.data ?? []) as unknown as BookingRow[];
+      const rows = (bookingResult.data ?? []) as BookingRow[];
       setBookings(rows.map(mapBooking));
-      setRatings(
-        Object.fromEntries(
-          rows.filter((r) => r.rating != null).map((r) => [r.code, r.rating as number]),
-        ),
-      );
-      setWithdrawals(((wd.data ?? []) as unknown as WithdrawalRow[]).map(mapWithdrawal));
-      setVouchers(
-        (v.data ?? []).map((r) => ({
-          id: r.id,
-          points: r.points,
-          value: r.value,
-          code: r.code,
-          date: String(r.created_at).slice(0, 10),
-        })),
-      );
+      setRatings(Object.fromEntries(rows.filter((r) => r.rating != null).map((r) => [r.code, r.rating as number])));
+      setWithdrawals(((withdrawalResult.data ?? []) as WithdrawalRow[]).map(mapWithdrawal));
+      setVouchers((voucherResult.data ?? []).map((r) => ({ id: r.id, points: r.points, value: r.value, code: r.code, date: String(r.created_at).slice(0, 10) })));
+      setError((publicError ?? bookingResult.error)?.message ?? null);
     } else {
-      setBookings([]);
-      setWithdrawals([]);
-      setVouchers([]);
-      setRatings({});
+      setBookings([]); setWithdrawals([]); setVouchers([]); setRatings({});
+      setError(publicError?.message ?? null);
     }
     setLoading(false);
   }, [user]);
 
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
+  useEffect(() => { void refresh(); }, [refresh]);
 
   const value = useMemo<StoreContextValue>(() => {
     const paid = bookings.filter((b) => b.payment === "paid" && b.status !== "cancelled");
-    const total = paid.reduce((s, b) => s + b.commission, 0);
-    const withdrawn = withdrawals
-      .filter((w) => w.status === "paid")
-      .reduce((s, w) => s + w.amount, 0);
-    const pendingW = withdrawals
-      .filter((w) => w.status === "pending" || w.status === "processing")
-      .reduce((s, w) => s + w.amount, 0);
-
-    type BookingPatch = {
-      status?: string;
-      payment?: string;
-      rating?: number;
-    };
-    const updateBooking = async (id: string, patch: BookingPatch) => {
-      await supabase.from("bookings").update(patch).eq("code", id);
-      await refresh();
-    };
-
+    const total = paid.reduce((sum, b) => sum + b.commission, 0);
+    const withdrawn = withdrawals.filter((w) => w.status === "paid").reduce((sum, w) => sum + w.amount, 0);
+    const pending = withdrawals.filter((w) => w.status === "pending" || w.status === "processing").reduce((sum, w) => sum + w.amount, 0);
+    const currentWorker = workers.find((w) => w.userId === user?.id) ?? null;
     return {
-      loading,
-      workers,
-      bookings,
-      withdrawals,
-      vouchers,
-      ratings,
-      commissions,
-      currentWorkerId,
+      loading, error, services, workers, bookings, withdrawals, vouchers, ratings, currentWorker,
       rewardPoints: profile?.reward_points ?? 0,
-      commissionWallet: {
-        total,
-        withdrawn,
-        pending: pendingW,
-        available: Math.max(0, total - withdrawn - pendingW),
-      },
+      commissionWallet: { total, withdrawn, pending, available: Math.max(0, total - withdrawn - pending) },
       refresh,
-      addBooking: async (b) => {
-        if (!user) return null;
-        const { data, error } = await supabase
-          .from("bookings")
-          .insert({
-            user_id: user.id,
-            customer_name: b.customerName,
-            customer_phone: b.customerPhone,
-            worker_id: b.workerId,
-            service_id: b.serviceId,
-            amount: b.amount,
-            commission: b.commission,
-            booking_date: b.date,
-            booking_time: b.time,
-            address: b.address,
-          })
-          .select("*")
-          .maybeSingle();
-        if (error || !data) return null;
+      addBooking: async ({ workerId, date, time, address }) => {
+        if (!user || !address.trim()) return null;
+        const { data, error: rpcError } = await supabase.rpc("create_booking", { _worker_id: workerId, _booking_date: date, _booking_time: time, _address: address.trim() });
+        if (rpcError || !data) return null;
         await refresh();
-        return mapBooking(data as unknown as BookingRow);
+        return mapBooking(data as BookingRow);
       },
-      setBookingStatus: (id, status) => updateBooking(id, { status }),
-      payBooking: async (id) => {
-        const target = bookings.find((b) => b.id === id);
-        if (!target || target.payment === "paid") return;
-        await supabase.from("bookings").update({ payment: "paid" }).eq("code", id);
-        await supabase.rpc("add_reward_points", { _points: 10 });
-        await Promise.all([refresh(), refreshProfile()]);
+      setBookingStatus: async (id, status) => {
+        const { error: rpcError } = await supabase.rpc("set_assigned_booking_status", { _code: id, _status: status });
+        if (!rpcError) await refresh();
+        return !rpcError;
       },
       cancelBooking: async (id) => {
-        const target = bookings.find((b) => b.id === id);
-        await updateBooking(id, {
-          status: "cancelled",
-          ...(target?.payment === "paid" ? { payment: "refunded" } : {}),
-        });
+        const { error: rpcError } = await supabase.rpc("cancel_own_booking", { _code: id });
+        if (!rpcError) await refresh();
+        return !rpcError;
       },
-      rateBooking: (id, stars) => updateBooking(id, { rating: stars }),
+      rateBooking: async (id, stars) => {
+        const { error: rpcError } = await supabase.rpc("rate_own_booking", { _code: id, _rating: stars });
+        if (!rpcError) await refresh();
+        return !rpcError;
+      },
       redeemReward: async () => {
-        const { data, error } = await supabase.rpc("redeem_reward_points");
-        if (error || !data) return null;
-        const row = data as unknown as {
-          id: string;
-          points: number;
-          value: number;
-          code: string;
-          created_at: string;
-        };
+        const { data, error: rpcError } = await supabase.rpc("redeem_reward_points");
+        if (rpcError || !data) return null;
         await Promise.all([refresh(), refreshProfile()]);
-        return {
-          id: row.id,
-          points: row.points,
-          value: row.value,
-          code: row.code,
-          date: String(row.created_at).slice(0, 10),
-        };
+        return { id: data.id, points: data.points, value: data.value, code: data.code, date: String(data.created_at).slice(0, 10) };
       },
       toggleWorkerAvailable: async (id) => {
-        const w = workers.find((x) => x.id === id);
-        if (!w) return;
-        await supabase.from("workers").update({ available: !w.available }).eq("id", id);
-        await refresh();
+        const worker = workers.find((w) => w.id === id);
+        if (!worker || worker.userId !== user?.id) return false;
+        const { error: rpcError } = await supabase.rpc("set_own_worker_availability", { _available: !worker.available });
+        if (!rpcError) await refresh();
+        return !rpcError;
       },
       verifyKyc: async (id) => {
-        await supabase.from("workers").update({ kyc: "verified" }).eq("id", id);
-        await refresh();
+        if (!isAdmin) return false;
+        const { error: rpcError } = await supabase.rpc("admin_set_worker_kyc", { _worker_id: id, _kyc: "verified" });
+        if (!rpcError) await refresh();
+        return !rpcError;
       },
-      setCurrentWorker: (id) => setCurrentWorkerId(id),
-      updateServiceCommission: async (serviceId, commission) => {
-        setCommissions((c) => ({ ...c, [serviceId]: commission }));
-        await supabase
-          .from("service_commissions")
-          .upsert({ service_id: serviceId, commission }, { onConflict: "service_id" });
+      updateService: async (id, price, commission, status) => {
+        if (!isAdmin) return false;
+        const { error: updateError } = await supabase.from("services").update({ price, commission, status, updated_at: new Date().toISOString() }).eq("id", id);
+        if (!updateError) await refresh();
+        return !updateError;
+      },
+      addWorker: async ({ email, name, serviceId, expYears, photo }) => {
+        if (!isAdmin) return "Admin access required";
+        const { error: rpcError } = await supabase.rpc("admin_link_worker", { _email: email.trim(), _name: name.trim(), _service_id: serviceId, _exp_years: expYears, _photo: photo.trim() });
+        if (!rpcError) { await refresh(); return null; }
+        return rpcError.message;
       },
       requestWithdrawal: async (amount, account) => {
-        await supabase.from("withdrawals").insert({ amount, account });
-        await refresh();
+        if (!isAdmin || !account.trim() || amount <= 0 || amount > Math.max(0, total - withdrawn - pending)) return false;
+        const { error: insertError } = await supabase.from("withdrawals").insert({ amount, account: account.trim() });
+        if (!insertError) await refresh();
+        return !insertError;
       },
       setWithdrawalStatus: async (id, status) => {
-        await supabase.from("withdrawals").update({ status }).eq("code", id);
-        await refresh();
+        if (!isAdmin) return false;
+        const { error: updateError } = await supabase.from("withdrawals").update({ status }).eq("code", id);
+        if (!updateError) await refresh();
+        return !updateError;
       },
     };
-  }, [
-    loading,
-    workers,
-    bookings,
-    withdrawals,
-    vouchers,
-    ratings,
-    commissions,
-    currentWorkerId,
-    profile,
-    user,
-    refresh,
-    refreshProfile,
-  ]);
+  }, [loading, error, services, workers, bookings, withdrawals, vouchers, ratings, profile, user, isAdmin, refresh, refreshProfile]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
 
 export function useStore() {
-  const ctx = useContext(StoreContext);
-  if (!ctx) throw new Error("useStore must be used inside StoreProvider");
-  return ctx;
+  const context = useContext(StoreContext);
+  if (!context) throw new Error("useStore must be used inside StoreProvider");
+  return context;
 }
 
-export function inr(n: number) {
-  return `₹${n.toLocaleString("en-IN")}`;
-}
+export function inr(amount: number) { return `₹${amount.toLocaleString("en-IN")}`; }
