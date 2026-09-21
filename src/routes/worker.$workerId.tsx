@@ -1,253 +1,38 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AppShell, SectionTitle } from "@/components/AppShell";
-import { services } from "@/lib/data";
 import { useAuth } from "@/lib/auth";
 import { inr, useStore } from "@/lib/store";
 
-export const Route = createFileRoute("/worker/$workerId")({
-  head: () => ({
-    meta: [
-      { title: "Worker Book Karein — Badre Electrician Service" },
-      { name: "description", content: "Worker chunein, date-time select karein aur online pay karein." },
-      { property: "og:title", content: "Worker Book Karein" },
-      { property: "og:description", content: "Trusted local worker booking." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-    ],
-  }),
-  component: WorkerBookingPage,
-});
+export const Route = createFileRoute("/worker/$workerId")({ head: () => ({ meta: [
+  { title: "Worker Book Karein — Badre Electrician Service" }, { name: "description", content: "Verified worker ke saath service booking karein." },
+  { property: "og:title", content: "Worker Booking" }, { property: "og:description", content: "Verified local worker booking." },
+  { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+] }), component: WorkerBookingPage });
 
-const dates = ["Aaj", "Kal", "18 Sep", "19 Sep"];
-const times = ["10:00 AM", "12:00 PM", "3:00 PM", "6:00 PM"];
+function isoDate(offset: number) { const date = new Date(); date.setDate(date.getDate() + offset); return date.toISOString().slice(0, 10); }
+function dateLabel(offset: number) { return offset === 0 ? "Aaj" : offset === 1 ? "Kal" : new Intl.DateTimeFormat("hi-IN", { day: "numeric", month: "short" }).format(new Date(`${isoDate(offset)}T12:00:00`)); }
 
 function WorkerBookingPage() {
-  const { workerId } = Route.useParams();
-  const navigate = useNavigate();
-  const { workers, commissions, addBooking, payBooking } = useStore();
-  const { user, profile } = useAuth();
-  const worker = workers.find((w) => w.id === workerId);
-  const [date, setDate] = useState<string>(dates[0]!);
-  const [time, setTime] = useState<string>(times[0]!);
-  const [address, setAddress] = useState("");
-  const [booked, setBooked] = useState<string | null>(null);
-  const [paid, setPaid] = useState(false);
-  const [busy, setBusy] = useState(false);
-
-
-  if (!worker) {
-    return (
-      <AppShell>
-        <p className="pt-10 text-center text-ink-soft">Worker nahi mila.</p>
-      </AppShell>
-    );
-  }
-
-  const service = services.find((s) => s.id === worker.serviceId)!;
-  const commission = commissions[service.id] ?? service.commission;
-  const amount = service.price;
-
+  const { workerId } = Route.useParams(); const navigate = useNavigate();
+  const { services, workers, addBooking } = useStore(); const { user } = useAuth();
+  const worker = workers.find((item) => item.id === workerId); const service = services.find((item) => item.id === worker?.serviceId);
+  const dates = useMemo(() => [0, 1, 2, 3].map((offset) => ({ value: isoDate(offset), label: dateLabel(offset) })), []);
+  const [date, setDate] = useState(dates[0]?.value ?? ""); const [time, setTime] = useState("10:00 AM"); const [address, setAddress] = useState(""); const [booked, setBooked] = useState<string | null>(null); const [busy, setBusy] = useState(false);
+  if (!worker || !service) return <AppShell><p className="pt-10 text-center text-ink-soft">Worker nahi mila.</p></AppShell>;
+  const bookable = worker.available && worker.kyc === "verified" && service.status === "active" && service.price != null && service.commission != null;
   const handleBook = async () => {
-    if (!user) {
-      toast.error("Booking ke liye pehle login karein");
-      navigate({ to: "/auth" });
-      return;
-    }
-    setBusy(true);
-    const b = await addBooking({
-      customerName: profile?.full_name || user.email || "Customer",
-      customerPhone: profile?.phone || "",
-      workerId: worker.id,
-      serviceId: service.id,
-      amount,
-      commission,
-      date,
-      time,
-      address: address || "Pune (GPS location)",
-    });
-    setBusy(false);
-    if (!b) {
-      toast.error("Booking save nahi hui — dobara koshish karein");
-      return;
-    }
-    setBooked(b.id);
-    toast.success("Booking ho gayi");
+    if (!user) { toast.error("Booking ke liye login karein"); navigate({ to: "/auth" }); return; }
+    if (address.trim().length < 5) { toast.error("Poora service address likhein"); return; }
+    setBusy(true); const booking = await addBooking({ workerId: worker.id, date, time, address }); setBusy(false);
+    if (!booking) { toast.error("Booking save nahi hui. Details check karein."); return; }
+    setBooked(booking.id); toast.success("Booking database mein save ho gayi");
   };
-
-  const handlePay = async () => {
-    if (!booked) return;
-    setBusy(true);
-    await payBooking(booked);
-    setBusy(false);
-    setPaid(true);
-  };
-
-  return (
-    <AppShell>
-      <header className="rise flex items-center gap-3">
-        <Link
-          to="/"
-          className="grid size-9 place-items-center rounded-full bg-glass/70 ring-1 ring-white/60 backdrop-blur-md"
-        >
-          ←
-        </Link>
-        <h1 className="text-lg font-extrabold">Booking karein</h1>
-      </header>
-
-      {/* worker card */}
-      <section className="rise flex items-center gap-3 rounded-3xl bg-glass/80 p-4 ring-1 ring-white/60 backdrop-blur-md [animation-delay:60ms]">
-        <img
-          src={worker.img}
-          alt={worker.name}
-          width={64}
-          height={64}
-          className="size-16 rounded-2xl object-cover"
-        />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <p className="text-base font-bold">{worker.name}</p>
-            <span className="rounded-full bg-volt/15 px-1.5 py-0.5 text-[10px] font-bold text-volt">
-              {worker.rating} ★
-            </span>
-          </div>
-          <p className="text-xs text-ink-soft">
-            {worker.role} · {worker.expYears} yrs exp · {worker.jobsDone} kaam
-          </p>
-          <p className="mt-0.5 text-[11px] text-ink-soft">
-            {worker.kyc === "verified" ? "✅ KYC verified" : "⏳ KYC pending"} ·{" "}
-            {worker.distanceKm} km door
-          </p>
-        </div>
-      </section>
-
-      {!booked ? (
-        <>
-          <section className="rise [animation-delay:120ms]">
-            <SectionTitle>Kaab?</SectionTitle>
-            <div className="grid grid-cols-4 gap-2">
-              {dates.map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setDate(d)}
-                  className={`rounded-2xl py-2.5 text-xs font-bold transition ${
-                    date === d
-                      ? "bg-ink text-white"
-                      : "bg-glass/75 text-ink ring-1 ring-white/60"
-                  }`}
-                >
-                  {d}
-                </button>
-              ))}
-            </div>
-            <div className="mt-2 grid grid-cols-4 gap-2">
-              {times.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTime(t)}
-                  className={`rounded-2xl py-2.5 text-[11px] font-bold transition ${
-                    time === t
-                      ? "bg-volt text-white"
-                      : "bg-glass/75 text-ink ring-1 ring-white/60"
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="rise [animation-delay:180ms]">
-            <SectionTitle>Address</SectionTitle>
-            <input
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Flat / ghar ka pata likhein"
-              className="w-full rounded-2xl bg-glass/75 px-4 py-3 text-sm ring-1 ring-white/60 backdrop-blur-md outline-none placeholder:text-ink-soft/60"
-            />
-            <p className="mt-1.5 text-[11px] text-ink-soft">
-              📍 Khali chhoda to GPS location use hogi
-            </p>
-          </section>
-
-          <section className="rise rounded-3xl bg-glass/80 p-4 ring-1 ring-white/60 backdrop-blur-md [animation-delay:240ms]">
-            <SectionTitle>Price estimate</SectionTitle>
-            <div className="space-y-1.5 text-sm">
-              <div className="flex justify-between">
-                <span className="text-ink-soft">{service.name} visit</span>
-                <span className="font-mono font-semibold">{inr(amount)}</span>
-              </div>
-              <div className="flex justify-between text-[12px]">
-                <span className="text-ink-soft">Platform commission</span>
-                <span className="font-mono text-ink-soft">{inr(commission)}</span>
-              </div>
-              <div className="flex justify-between text-[12px]">
-                <span className="text-ink-soft">Worker ko milega</span>
-                <span className="font-mono text-ink-soft">
-                  {inr(amount - commission)}
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={handleBook}
-              disabled={busy}
-              className="mt-4 w-full rounded-2xl bg-ink py-3 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-60"
-            >
-              Booking confirm karein · {inr(amount)}
-            </button>
-          </section>
-        </>
-      ) : (
-        <section className="rise rounded-3xl bg-glass/80 p-5 text-center ring-1 ring-white/60 backdrop-blur-md [animation-delay:120ms]">
-          {paid ? (
-            <>
-              <div className="pop mx-auto grid size-14 place-items-center rounded-full bg-volt text-2xl text-white">
-                ✓
-              </div>
-              <h2 className="mt-3 text-lg font-extrabold">Payment successful!</h2>
-              <p className="mt-1 text-sm text-ink-soft">
-                Booking {booked} — {inr(amount)} pay ho gaya.
-              </p>
-              <p className="mt-1 text-xs text-ink-soft">
-                🎁 +10 reward points mile!
-              </p>
-              <button
-                onClick={() => navigate({ to: "/bookings" })}
-                className="mt-4 w-full rounded-2xl bg-ink py-3 text-sm font-bold text-white transition active:scale-[0.98]"
-              >
-                Meri bookings dekhein
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="pop mx-auto grid size-14 place-items-center rounded-full bg-amber/20 text-2xl">
-                📋
-              </div>
-              <h2 className="mt-3 text-lg font-extrabold">Booking ho gayi!</h2>
-              <p className="mt-1 text-sm text-ink-soft">
-                {booked} · {date}, {time} · {worker.name}
-              </p>
-              <div className="mt-4 rounded-2xl bg-ink/5 p-3 text-left text-sm">
-                <div className="flex justify-between">
-                  <span className="text-ink-soft">Pay karna hai</span>
-                  <span className="font-mono font-bold">{inr(amount)}</span>
-                </div>
-              </div>
-              <button
-                onClick={handlePay}
-                disabled={busy}
-                className="mt-4 w-full rounded-2xl bg-volt py-3 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-60"
-              >
-                💳 UPI se pay karein · {inr(amount)}
-              </button>
-              <p className="mt-2 text-[11px] text-ink-soft">
-                Payment aapke merchant account mein jayega
-              </p>
-            </>
-          )}
-        </section>
-      )}
-    </AppShell>
-  );
+  return <AppShell><header className="rise flex items-center gap-3"><Link to="/service/$serviceId" params={{ serviceId: service.id }} className="grid size-9 place-items-center rounded-full bg-glass/70 ring-1 ring-white/60">←</Link><h1 className="text-lg font-extrabold">Booking karein</h1></header>
+    <section className="rise flex items-center gap-3 rounded-3xl bg-glass/80 p-4 ring-1 ring-white/60">{worker.img ? <img src={worker.img} alt={worker.name} className="size-16 rounded-2xl object-cover" /> : <div className="grid size-16 place-items-center rounded-2xl bg-ink font-display text-2xl text-amber">{worker.name.charAt(0).toUpperCase()}</div>}<div><p className="text-base font-bold">{worker.name}</p><p className="text-xs text-ink-soft">{worker.role} · {worker.expYears} yrs{worker.rating > 0 ? ` · ${worker.rating} ★` : ""}</p><p className="text-[11px] text-volt">✓ KYC verified</p></div></section>
+    {!booked ? <><section className="rise"><SectionTitle>Kab?</SectionTitle><div className="grid grid-cols-4 gap-2">{dates.map((item) => <button key={item.value} onClick={() => setDate(item.value)} className={`rounded-2xl py-2.5 text-xs font-bold ${date === item.value ? "bg-ink text-white" : "bg-glass/75 ring-1 ring-white/60"}`}>{item.label}</button>)}</div><div className="mt-2 grid grid-cols-2 gap-2">{["10:00 AM", "12:00 PM", "3:00 PM", "6:00 PM"].map((item) => <button key={item} onClick={() => setTime(item)} className={`rounded-2xl py-2.5 text-xs font-bold ${time === item ? "bg-volt text-white" : "bg-glass/75 ring-1 ring-white/60"}`}>{item}</button>)}</div></section>
+      <section><SectionTitle>Service address</SectionTitle><textarea value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Ghar / flat, gali, area aur city" rows={3} className="w-full resize-none rounded-2xl bg-glass/75 px-4 py-3 text-sm ring-1 ring-white/60 outline-none" /></section>
+      <section className="rounded-3xl bg-glass/80 p-4 ring-1 ring-white/60"><SectionTitle>Price</SectionTitle>{service.price != null && service.commission != null ? <><div className="flex justify-between text-sm"><span>{service.name} visit</span><span className="font-mono font-bold">{inr(service.price)}</span></div><div className="mt-1 flex justify-between text-xs text-ink-soft"><span>Commission</span><span>{inr(service.commission)}</span></div></> : <p className="text-xs text-ink-soft">Price configured nahi hai.</p>}<button onClick={handleBook} disabled={!bookable || busy} className="mt-4 w-full rounded-2xl bg-ink py-3 text-sm font-bold text-white disabled:opacity-50">{busy ? "Save ho raha hai..." : service.price != null ? `Booking confirm · ${inr(service.price)}` : "Booking unavailable"}</button></section></> : <section className="rounded-3xl bg-glass/80 p-5 text-center ring-1 ring-white/60"><div className="mx-auto grid size-14 place-items-center rounded-full bg-volt text-2xl text-white">✓</div><h2 className="mt-3 text-lg font-extrabold">Booking ho gayi</h2><p className="mt-1 text-sm text-ink-soft">{booked} · payment pending</p><div className="mt-4 rounded-2xl bg-amber/10 p-3 text-xs text-ink-soft">Online payment gateway abhi connected nahi hai. App payment ko paid mark nahi karega.</div><button onClick={() => navigate({ to: "/bookings" })} className="mt-4 w-full rounded-2xl bg-ink py-3 text-sm font-bold text-white">Meri bookings dekhein</button></section>}
+  </AppShell>;
 }
