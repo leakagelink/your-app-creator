@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import { AppShell, SectionTitle } from "@/components/AppShell";
 import { services } from "@/lib/data";
+import { useAuth } from "@/lib/auth";
 import { inr, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/worker/$workerId")({
@@ -25,12 +27,15 @@ function WorkerBookingPage() {
   const { workerId } = Route.useParams();
   const navigate = useNavigate();
   const { workers, commissions, addBooking, payBooking } = useStore();
+  const { user, profile } = useAuth();
   const worker = workers.find((w) => w.id === workerId);
   const [date, setDate] = useState<string>(dates[0]!);
   const [time, setTime] = useState<string>(times[0]!);
   const [address, setAddress] = useState("");
   const [booked, setBooked] = useState<string | null>(null);
   const [paid, setPaid] = useState(false);
+  const [busy, setBusy] = useState(false);
+
 
   if (!worker) {
     return (
@@ -44,10 +49,16 @@ function WorkerBookingPage() {
   const commission = commissions[service.id] ?? service.commission;
   const amount = service.price;
 
-  const handleBook = () => {
-    const b = addBooking({
-      customerName: "Rohan Kumar",
-      customerPhone: "98xxxxxx21",
+  const handleBook = async () => {
+    if (!user) {
+      toast.error("Booking ke liye pehle login karein");
+      navigate({ to: "/auth" });
+      return;
+    }
+    setBusy(true);
+    const b = await addBooking({
+      customerName: profile?.full_name || user.email || "Customer",
+      customerPhone: profile?.phone || "",
       workerId: worker.id,
       serviceId: service.id,
       amount,
@@ -56,14 +67,21 @@ function WorkerBookingPage() {
       time,
       address: address || "Pune (GPS location)",
     });
+    setBusy(false);
+    if (!b) {
+      toast.error("Booking save nahi hui — dobara koshish karein");
+      return;
+    }
     setBooked(b.id);
+    toast.success("Booking ho gayi");
   };
 
-  const handlePay = () => {
-    if (booked) {
-      payBooking(booked);
-      setPaid(true);
-    }
+  const handlePay = async () => {
+    if (!booked) return;
+    setBusy(true);
+    await payBooking(booked);
+    setBusy(false);
+    setPaid(true);
   };
 
   return (
@@ -173,7 +191,8 @@ function WorkerBookingPage() {
             </div>
             <button
               onClick={handleBook}
-              className="mt-4 w-full rounded-2xl bg-ink py-3 text-sm font-bold text-white transition active:scale-[0.98]"
+              disabled={busy}
+              className="mt-4 w-full rounded-2xl bg-ink py-3 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-60"
             >
               Booking confirm karein · {inr(amount)}
             </button>
@@ -217,7 +236,8 @@ function WorkerBookingPage() {
               </div>
               <button
                 onClick={handlePay}
-                className="mt-4 w-full rounded-2xl bg-volt py-3 text-sm font-bold text-white transition active:scale-[0.98]"
+                disabled={busy}
+                className="mt-4 w-full rounded-2xl bg-volt py-3 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-60"
               >
                 💳 UPI se pay karein · {inr(amount)}
               </button>

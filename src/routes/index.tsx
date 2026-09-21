@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell, SectionTitle } from "@/components/AppShell";
 import { Logo } from "@/components/Logo";
 import { services } from "@/lib/data";
+import { useAuth } from "@/lib/auth";
 import { inr, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
@@ -41,8 +42,11 @@ const tintClasses: Record<string, string> = {
 };
 
 function HomePage() {
-  const { workers, commissionWallet } = useStore();
+  const { workers, rewardPoints } = useStore();
+  const { profile, user } = useAuth();
   const available = workers.filter((w) => w.available);
+  const displayName =
+    profile?.full_name || user?.email?.split("@")[0] || "Mehmaan";
 
   return (
     <AppShell>
@@ -52,12 +56,12 @@ function HomePage() {
           <Logo className="size-11" />
           <div>
             <p className="text-[11px] font-medium text-ink-soft">Namaste,</p>
-            <p className="text-base leading-none font-extrabold">Rohan Kumar</p>
+            <p className="text-base leading-none font-extrabold">{displayName}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <div className="rounded-full bg-glass/70 px-3 py-2 text-xs font-semibold ring-1 ring-white/60 backdrop-blur-md">
-            <span className="text-ink-soft">📍 Pune</span>{" "}
+            <span className="text-ink-soft">📍 {profile?.city || "Pune"}</span>{" "}
             <span className="text-ink">·</span>{" "}
             <span className="text-volt">Home</span>
           </div>
@@ -175,7 +179,7 @@ function HomePage() {
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-bold">Aapka wallet</h2>
           <span className="rounded-full bg-volt/15 px-2 py-0.5 text-[10px] font-bold text-volt">
-            {inr(commissionWallet.available)}
+            {rewardPoints} points
           </span>
         </div>
         <div className="grid grid-cols-3 gap-2">
