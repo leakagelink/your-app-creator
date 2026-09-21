@@ -179,7 +179,7 @@ function HomePage() {
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-bold">Aapka wallet</h2>
           <span className="rounded-full bg-volt/15 px-2 py-0.5 text-[10px] font-bold text-volt">
-            {inr(commissionWallet.available)}
+            {rewardPoints} points
           </span>
         </div>
         <div className="grid grid-cols-3 gap-2">
