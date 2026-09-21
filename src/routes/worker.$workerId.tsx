@@ -191,7 +191,8 @@ function WorkerBookingPage() {
             </div>
             <button
               onClick={handleBook}
-              className="mt-4 w-full rounded-2xl bg-ink py-3 text-sm font-bold text-white transition active:scale-[0.98]"
+              disabled={busy}
+              className="mt-4 w-full rounded-2xl bg-ink py-3 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-60"
             >
               Booking confirm karein · {inr(amount)}
             </button>
@@ -235,7 +236,8 @@ function WorkerBookingPage() {
               </div>
               <button
                 onClick={handlePay}
-                className="mt-4 w-full rounded-2xl bg-volt py-3 text-sm font-bold text-white transition active:scale-[0.98]"
+                disabled={busy}
+                className="mt-4 w-full rounded-2xl bg-volt py-3 text-sm font-bold text-white transition active:scale-[0.98] disabled:opacity-60"
               >
                 💳 UPI se pay karein · {inr(amount)}
               </button>
