@@ -15,11 +15,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-[100dvh] w-full bg-gradient-to-b from-ice via-paper to-ice font-sans text-ink antialiased">
       <div className="relative mx-auto min-h-[100dvh] w-full max-w-[420px] overflow-hidden">
-        {/* ambient blobs */}
-        <div className="pointer-events-none absolute -top-24 -left-16 size-72 rounded-full bg-lav/25 blur-3xl" />
-        <div className="pointer-events-none absolute top-40 -right-20 size-72 rounded-full bg-amber/20 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-24 left-1/3 size-64 rounded-full bg-volt/15 blur-3xl" />
-
         <div className="relative space-y-5 px-4 pt-5 pb-32">{children}</div>
 
         {/* bottom nav */}

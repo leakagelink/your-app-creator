@@ -1,25 +1,12 @@
-import workerSuresh from "@/assets/worker-suresh.jpg";
-import workerImran from "@/assets/worker-imran.jpg";
-import workerVikram from "@/assets/worker-vikram.jpg";
-
 export type Service = {
   id: string;
   name: string;
   icon: string;
   tint: "amber" | "lav" | "volt";
-  price: number;
-  commission: number;
+  price: number | null;
+  commission: number | null;
+  status: "active" | "coming_soon";
 };
-
-export const services: Service[] = [
-  { id: "electrician", name: "Electrician", icon: "⚡", tint: "amber", price: 500, commission: 20 },
-  { id: "plumber", name: "Plumber", icon: "🔧", tint: "lav", price: 400, commission: 20 },
-  { id: "ac", name: "AC Mechanic", icon: "❄️", tint: "volt", price: 800, commission: 30 },
-  { id: "carpenter", name: "Carpenter", icon: "🪚", tint: "amber", price: 450, commission: 20 },
-  { id: "painter", name: "Painter", icon: "🎨", tint: "lav", price: 600, commission: 25 },
-  { id: "cleaning", name: "Cleaning", icon: "🧽", tint: "volt", price: 350, commission: 15 },
-  { id: "locksmith", name: "Locksmith", icon: "🔒", tint: "amber", price: 300, commission: 15 },
-];
 
 export type Worker = {
   id: string;
@@ -30,15 +17,10 @@ export type Worker = {
   rating: number;
   jobsDone: number;
   distanceKm: number;
-  img: string;
+  img: string | null;
+  userId: string | null;
   available: boolean;
   kyc: "pending" | "verified";
-};
-
-export const workerPhotos: Record<string, string> = {
-  suresh: workerSuresh,
-  imran: workerImran,
-  vikram: workerVikram,
 };
 
 export type BookingStatus =

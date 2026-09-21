@@ -24,6 +24,7 @@ type AuthContextValue = {
   user: User | null;
   profile: Profile | null;
   isAdmin: boolean;
+  isWorker: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -34,12 +35,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isWorker, setIsWorker] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadProfile = useCallback(async (userId: string | undefined) => {
     if (!userId) {
       setProfile(null);
       setIsAdmin(false);
+      setIsWorker(false);
       return;
     }
     const { data } = await supabase
@@ -54,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .select("role")
       .eq("user_id", userId);
     setIsAdmin((roles ?? []).some((r) => r.role === "admin"));
+    setIsWorker((roles ?? []).some((r) => r.role === "worker"));
   }, []);
 
   useEffect(() => {
@@ -85,14 +89,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: session?.user ?? null,
       profile,
       isAdmin,
+      isWorker,
       refreshProfile: () => loadProfile(session?.user?.id),
       signOut: async () => {
         await supabase.auth.signOut();
         setProfile(null);
         setIsAdmin(false);
+        setIsWorker(false);
       },
     }),
-    [loading, session, profile, isAdmin, loadProfile],
+    [loading, session, profile, isAdmin, isWorker, loadProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

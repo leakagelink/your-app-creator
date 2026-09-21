@@ -42,6 +42,7 @@ export type Database = {
           customer_phone: string
           payment: string
           rating: number | null
+          reward_credited: boolean
           service_id: string
           status: string
           user_id: string
@@ -59,6 +60,7 @@ export type Database = {
           customer_phone?: string
           payment?: string
           rating?: number | null
+          reward_credited?: boolean
           service_id: string
           status?: string
           user_id: string
@@ -76,6 +78,7 @@ export type Database = {
           customer_phone?: string
           payment?: string
           rating?: number | null
+          reward_credited?: boolean
           service_id?: string
           status?: string
           user_id?: string
@@ -135,6 +138,42 @@ export type Database = {
         Update: {
           commission?: number
           service_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          commission: number | null
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          price: number | null
+          status: string
+          tint: string
+          updated_at: string
+        }
+        Insert: {
+          commission?: number | null
+          created_at?: string
+          icon: string
+          id: string
+          name: string
+          price?: number | null
+          status?: string
+          tint: string
+          updated_at?: string
+        }
+        Update: {
+          commission?: number | null
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          price?: number | null
+          status?: string
+          tint?: string
           updated_at?: string
         }
         Relationships: []
@@ -268,12 +307,83 @@ export type Database = {
     }
     Functions: {
       add_reward_points: { Args: { _points: number }; Returns: number }
+      admin_link_worker: {
+        Args: {
+          _email: string
+          _exp_years: number
+          _name: string
+          _photo?: string
+          _service_id: string
+        }
+        Returns: {
+          available: boolean
+          created_at: string
+          distance_km: number
+          exp_years: number
+          id: string
+          jobs_done: number
+          kyc: string
+          name: string
+          photo: string
+          rating: number
+          role: string
+          service_id: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "workers"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_worker_kyc: {
+        Args: { _kyc: string; _worker_id: string }
+        Returns: undefined
+      }
+      cancel_own_booking: { Args: { _code: string }; Returns: undefined }
+      create_booking: {
+        Args: {
+          _address: string
+          _booking_date: string
+          _booking_time: string
+          _worker_id: string
+        }
+        Returns: {
+          address: string
+          amount: number
+          booking_date: string
+          booking_time: string
+          code: string
+          commission: number
+          created_at: string
+          customer_name: string
+          customer_phone: string
+          payment: string
+          rating: number | null
+          reward_credited: boolean
+          service_id: string
+          status: string
+          user_id: string
+          worker_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "bookings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      rate_own_booking: {
+        Args: { _code: string; _rating: number }
+        Returns: undefined
       }
       redeem_reward_points: {
         Args: never
@@ -291,6 +401,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      set_assigned_booking_status: {
+        Args: { _code: string; _status: string }
+        Returns: undefined
+      }
+      set_own_worker_availability: {
+        Args: { _available: boolean }
+        Returns: undefined
       }
     }
     Enums: {
