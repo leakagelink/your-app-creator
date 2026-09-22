@@ -165,9 +165,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       updateService: async (id, price, commission, status) => {
         if (!isAdmin) return false;
-        const { error: updateError } = await supabase.from("services").update({ price, commission, status, updated_at: new Date().toISOString() }).eq("id", id);
-        if (!updateError) await refresh();
-        return !updateError;
+        const { error: rpcError } = await supabase.rpc("admin_update_service", { _service_id: id, _price: price, _commission: commission, _status: status });
+        if (!rpcError) await refresh();
+        return !rpcError;
       },
       addWorker: async ({ email, name, serviceId, expYears, photo }) => {
         if (!isAdmin) return "Admin access required";
@@ -177,15 +177,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       requestWithdrawal: async (amount, account) => {
         if (!isAdmin || !account.trim() || amount <= 0 || amount > Math.max(0, total - withdrawn - pending)) return false;
-        const { error: insertError } = await supabase.from("withdrawals").insert({ amount, account: account.trim() });
-        if (!insertError) await refresh();
-        return !insertError;
+        const { error: rpcError } = await supabase.rpc("admin_request_withdrawal", { _amount: amount, _account: account.trim() });
+        if (!rpcError) await refresh();
+        return !rpcError;
       },
       setWithdrawalStatus: async (id, status) => {
         if (!isAdmin) return false;
-        const { error: updateError } = await supabase.from("withdrawals").update({ status }).eq("code", id);
-        if (!updateError) await refresh();
-        return !updateError;
+        const { error: rpcError } = await supabase.rpc("admin_set_withdrawal_status", { _code: id, _status: status });
+        if (!rpcError) await refresh();
+        return !rpcError;
       },
     };
   }, [loading, error, services, workers, bookings, withdrawals, vouchers, ratings, profile, user, isAdmin, refresh, refreshProfile]);
