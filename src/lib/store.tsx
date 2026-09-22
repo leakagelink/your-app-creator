@@ -165,7 +165,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       updateService: async (id, price, commission, status) => {
         if (!isAdmin) return false;
-        const { error: rpcError } = await supabase.rpc("admin_update_service", { _service_id: id, _price: price, _commission: commission, _status: status });
+        const { error: rpcError } = await supabase.rpc("admin_update_service", { _service_id: id, _price: price ?? -1, _commission: commission ?? -1, _status: status });
         if (!rpcError) await refresh();
         return !rpcError;
       },
