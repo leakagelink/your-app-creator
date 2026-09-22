@@ -337,8 +337,38 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_request_withdrawal: {
+        Args: { _account: string; _amount: number }
+        Returns: {
+          account: string
+          amount: number
+          code: string
+          created_at: string
+          requested_on: string
+          status: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "withdrawals"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_withdrawal_status: {
+        Args: { _code: string; _status: string }
+        Returns: undefined
+      }
       admin_set_worker_kyc: {
         Args: { _kyc: string; _worker_id: string }
+        Returns: undefined
+      }
+      admin_update_service: {
+        Args: {
+          _commission: number
+          _price: number
+          _service_id: string
+          _status: string
+        }
         Returns: undefined
       }
       cancel_own_booking: { Args: { _code: string }; Returns: undefined }
