@@ -64,6 +64,13 @@
       "when": 1790047628932,
       "tag": "0008_restrict_public_worker_data",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790228560016,
+      "tag": "0009_percent_commission_ledger",
+      "breakpoints": true
     }
   ]
 }

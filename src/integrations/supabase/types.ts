@@ -29,6 +29,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          commission_percent: number
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          commission_percent?: number
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          commission_percent?: number
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           address: string
@@ -37,16 +55,24 @@ export type Database = {
           booking_time: string
           code: string
           commission: number
+          commission_percent: number
           created_at: string
           customer_name: string
           customer_phone: string
+          paid_at: string | null
           payment: string
+          payment_method: string | null
+          payment_ref: string | null
+          payout_paid_at: string | null
+          payout_ref: string | null
+          payout_status: string
           rating: number | null
           reward_credited: boolean
           service_id: string
           status: string
           user_id: string
           worker_id: string
+          worker_payout: number
         }
         Insert: {
           address: string
@@ -55,16 +81,24 @@ export type Database = {
           booking_time: string
           code?: string
           commission: number
+          commission_percent?: number
           created_at?: string
           customer_name: string
           customer_phone?: string
+          paid_at?: string | null
           payment?: string
+          payment_method?: string | null
+          payment_ref?: string | null
+          payout_paid_at?: string | null
+          payout_ref?: string | null
+          payout_status?: string
           rating?: number | null
           reward_credited?: boolean
           service_id: string
           status?: string
           user_id: string
           worker_id: string
+          worker_payout?: number
         }
         Update: {
           address?: string
@@ -73,16 +107,24 @@ export type Database = {
           booking_time?: string
           code?: string
           commission?: number
+          commission_percent?: number
           created_at?: string
           customer_name?: string
           customer_phone?: string
+          paid_at?: string | null
           payment?: string
+          payment_method?: string | null
+          payment_ref?: string | null
+          payout_paid_at?: string | null
+          payout_ref?: string | null
+          payout_status?: string
           rating?: number | null
           reward_credited?: boolean
           service_id?: string
           status?: string
           user_id?: string
           worker_id?: string
+          worker_payout?: number
         }
         Relationships: [
           {
@@ -175,6 +217,42 @@ export type Database = {
           status?: string
           tint?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          booking_code: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          note: string | null
+          reference: string | null
+          type: string
+          worker_id: string | null
+        }
+        Insert: {
+          amount: number
+          booking_code?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          note?: string | null
+          reference?: string | null
+          type: string
+          worker_id?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_code?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          note?: string | null
+          reference?: string | null
+          type?: string
+          worker_id?: string | null
         }
         Relationships: []
       }
@@ -337,6 +415,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_mark_booking_paid: {
+        Args: { _code: string; _method: string; _ref: string }
+        Returns: undefined
+      }
+      admin_mark_worker_paid: {
+        Args: { _code: string; _ref: string }
+        Returns: undefined
+      }
       admin_request_withdrawal: {
         Args: { _account: string; _amount: number }
         Returns: {
@@ -353,6 +439,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_set_commission_percent: {
+        Args: { _percent: number }
+        Returns: undefined
       }
       admin_set_withdrawal_status: {
         Args: { _code: string; _status: string }
@@ -371,6 +461,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      calc_commission: { Args: { _amount: number }; Returns: number }
       cancel_own_booking: { Args: { _code: string }; Returns: undefined }
       create_booking: {
         Args: {
@@ -386,16 +477,24 @@ export type Database = {
           booking_time: string
           code: string
           commission: number
+          commission_percent: number
           created_at: string
           customer_name: string
           customer_phone: string
+          paid_at: string | null
           payment: string
+          payment_method: string | null
+          payment_ref: string | null
+          payout_paid_at: string | null
+          payout_ref: string | null
+          payout_status: string
           rating: number | null
           reward_credited: boolean
           service_id: string
           status: string
           user_id: string
           worker_id: string
+          worker_payout: number
         }
         SetofOptions: {
           from: "*"
@@ -411,6 +510,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_payout_due_if_ready: { Args: { _code: string }; Returns: undefined }
       rate_own_booking: {
         Args: { _code: string; _rating: number }
         Returns: undefined
