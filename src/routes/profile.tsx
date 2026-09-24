@@ -19,7 +19,7 @@ export const Route = createFileRoute("/profile")({
 
 function ProfilePage() {
   const navigate = useNavigate();
-  const { user, profile, loading, signOut } = useAuth();
+  const { user, profile, loading, signOut, isAdmin, isWorker } = useAuth();
 
   const displayName = profile?.full_name?.trim() || user?.email?.split("@")[0] || "Profile";
   const initial = displayName.charAt(0).toUpperCase();
@@ -82,10 +82,10 @@ function ProfilePage() {
       </section>
 
       {/* role panels */}
-      <section className="rise [animation-delay:120ms]">
+      {user && (isAdmin || isWorker) ? <section className="rise [animation-delay:120ms]">
         <SectionTitle>Panels</SectionTitle>
         <div className="space-y-2.5">
-          <Link
+          {isWorker ? <Link
             to="/worker-panel"
             className="flex items-center justify-between rounded-3xl bg-glass/80 p-4 ring-1 ring-white/60 backdrop-blur-md transition active:scale-[0.98]"
           >
@@ -101,8 +101,8 @@ function ProfilePage() {
               </div>
             </div>
             <span className="text-ink-soft">→</span>
-          </Link>
-          <Link
+          </Link> : null}
+          {isAdmin ? <Link
             to="/admin"
             className="flex items-center justify-between rounded-3xl bg-ink p-4 text-white transition active:scale-[0.98]"
           >
@@ -118,9 +118,9 @@ function ProfilePage() {
               </div>
             </div>
             <span className="text-amber">→</span>
-          </Link>
+          </Link> : null}
         </div>
-      </section>
+      </section> : null}
 
       <p className="rise pt-2 text-center font-mono text-[10px] text-ink-soft [animation-delay:240ms]">
         Badre Electrician Service · badreelectricianservice.online

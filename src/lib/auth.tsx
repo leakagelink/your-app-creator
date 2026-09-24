@@ -66,14 +66,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       if (!active) return;
       setSession(s);
-      void loadProfile(s?.user?.id);
+      if (_event === "TOKEN_REFRESHED") return;
+      setLoading(true);
+      void loadProfile(s?.user?.id).finally(() => { if (active) setLoading(false); });
     });
 
     void supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
       setSession(data.session);
-      void loadProfile(data.session?.user?.id);
-      setLoading(false);
+      void loadProfile(data.session?.user?.id).finally(() => { if (active) setLoading(false); });
     });
 
     return () => {
