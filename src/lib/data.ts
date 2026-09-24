@@ -46,6 +46,12 @@ export type Booking = {
   status: BookingStatus;
   payment: PaymentStatus;
   createdAt: number;
+  workerPayout: number;
+  commissionPercent: number;
+  payoutStatus: "not_due" | "due" | "paid";
+  paymentMethod: string | null;
+  paymentRef: string | null;
+  payoutRef: string | null;
 };
 
 export type WithdrawalStatus = "pending" | "processing" | "paid" | "failed";
@@ -74,5 +80,24 @@ export const withdrawalLabels: Record<WithdrawalStatus, string> = {
 };
 
 export function workerPayout(b: Booking) {
-  return b.amount - b.commission;
+  return b.workerPayout;
 }
+
+export type Transaction = {
+  id: string;
+  type: "customer_payment" | "commission_credit" | "worker_payout_due" | "worker_payout_paid" | "commission_withdrawal";
+  amount: number;
+  bookingCode: string | null;
+  workerId: string | null;
+  reference: string | null;
+  note: string | null;
+  date: string;
+};
+
+export const txnLabels: Record<Transaction["type"], string> = {
+  customer_payment: "Customer payment",
+  commission_credit: "Commission (Admin Wallet)",
+  worker_payout_due: "Worker payout due",
+  worker_payout_paid: "Worker payout paid",
+  commission_withdrawal: "Admin withdrawal",
+};

@@ -13,6 +13,7 @@ import type {
   Booking,
   BookingStatus,
   Service,
+  Transaction,
   Withdrawal,
   WithdrawalStatus,
   Worker,
@@ -30,6 +31,11 @@ type StoreContextValue = {
   rewardPoints: number;
   ratings: Record<string, number>;
   vouchers: Voucher[];
+  transactions: Transaction[];
+  commissionPercent: number;
+  setCommissionPercent: (percent: number) => Promise<boolean>;
+  markBookingPaid: (id: string, method: "cash" | "upi" | "bank", ref: string) => Promise<string | null>;
+  markWorkerPaid: (id: string, ref: string) => Promise<string | null>;
   currentWorker: Worker | null;
   commissionWallet: { total: number; withdrawn: number; pending: number; available: number };
   refresh: () => Promise<void>;
@@ -49,7 +55,7 @@ type StoreContextValue = {
 const StoreContext = createContext<StoreContextValue | null>(null);
 
 type WorkerRow = { id: string; user_id: string | null; name: string; service_id: string; role: string; exp_years: number; rating: number | string; jobs_done: number; distance_km: number | string; photo: string; available: boolean; kyc: string };
-type BookingRow = { code: string; customer_name: string; customer_phone: string; worker_id: string; service_id: string; amount: number; commission: number; booking_date: string; booking_time: string; address: string; status: string; payment: string; rating: number | null; created_at: string };
+type BookingRow = { code: string; customer_name: string; customer_phone: string; worker_id: string; service_id: string; amount: number; commission: number; booking_date: string; booking_time: string; address: string; status: string; payment: string; rating: number | null; created_at: string; worker_payout: number; commission_percent: number | string; payout_status: string; payment_method: string | null; payment_ref: string | null; payout_ref: string | null };
 type WithdrawalRow = { code: string; amount: number; status: string; account: string; requested_on: string };
 
 const mapService = (r: { id: string; name: string; icon: string; tint: string; price: number | null; commission: number | null; status: string }): Service => ({
@@ -67,6 +73,9 @@ const mapBooking = (r: BookingRow): Booking => ({
   date: r.booking_date, time: r.booking_time, address: r.address,
   status: r.status as BookingStatus, payment: r.payment as Booking["payment"],
   createdAt: new Date(r.created_at).getTime(),
+  workerPayout: r.worker_payout ?? r.amount - r.commission, commissionPercent: Number(r.commission_percent ?? 4),
+  payoutStatus: (r.payout_status === "due" || r.payout_status === "paid" ? r.payout_status : "not_due"),
+  paymentMethod: r.payment_method ?? null, paymentRef: r.payment_ref ?? null, payoutRef: r.payout_ref ?? null,
 });
 const mapWithdrawal = (r: WithdrawalRow): Withdrawal => ({ id: r.code, amount: r.amount, status: r.status as WithdrawalStatus, date: r.requested_on, account: r.account });
 
@@ -80,22 +89,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [commissionPercent, setPct] = useState(4);
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const [serviceResult, workerResult] = await Promise.all([
+    const [serviceResult, workerResult, settingsResult] = await Promise.all([
       supabase.from("services").select("*").order("created_at"),
       supabase.from("workers").select("*").order("created_at"),
+      supabase.from("app_settings").select("commission_percent").eq("id", 1).maybeSingle(),
     ]);
+    if (settingsResult.data) setPct(Number(settingsResult.data.commission_percent));
     const publicError = serviceResult.error ?? workerResult.error;
     setServices((serviceResult.data ?? []).map(mapService));
     setWorkers(((workerResult.data ?? []) as WorkerRow[]).map(mapWorker));
     if (user) {
-      const [bookingResult, withdrawalResult, voucherResult] = await Promise.all([
+      const [bookingResult, withdrawalResult, voucherResult, txnResult] = await Promise.all([
         supabase.from("bookings").select("*").order("created_at", { ascending: false }),
         supabase.from("withdrawals").select("*").order("created_at", { ascending: false }),
         supabase.from("vouchers").select("*").order("created_at", { ascending: false }),
+        supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(500),
       ]);
+      setTransactions((txnResult.data ?? []).map((t) => ({ id: t.id, type: t.type as Transaction["type"], amount: t.amount, bookingCode: t.booking_code, workerId: t.worker_id, reference: t.reference, note: t.note, date: new Date(t.created_at).toLocaleString("en-IN") })));
       const rows = (bookingResult.data ?? []) as BookingRow[];
       setBookings(rows.map(mapBooking));
       setRatings(Object.fromEntries(rows.filter((r) => r.rating != null).map((r) => [r.code, r.rating as number])));
@@ -103,7 +118,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setVouchers((voucherResult.data ?? []).map((r) => ({ id: r.id, points: r.points, value: r.value, code: r.code, date: String(r.created_at).slice(0, 10) })));
       setError((publicError ?? bookingResult.error)?.message ?? null);
     } else {
-      setBookings([]); setWithdrawals([]); setVouchers([]); setRatings({});
+      setBookings([]); setWithdrawals([]); setVouchers([]); setRatings({}); setTransactions([]);
       setError(publicError?.message ?? null);
     }
     setLoading(false);
@@ -118,7 +133,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const pending = withdrawals.filter((w) => w.status === "pending" || w.status === "processing").reduce((sum, w) => sum + w.amount, 0);
     const currentWorker = workers.find((w) => w.userId === user?.id) ?? null;
     return {
-      loading, error, services, workers, bookings, withdrawals, vouchers, ratings, currentWorker,
+      loading, error, services, workers, bookings, withdrawals, vouchers, ratings, currentWorker, transactions, commissionPercent,
+      setCommissionPercent: async (percent) => {
+        if (!isAdmin) return false;
+        const { error: rpcError } = await supabase.rpc("admin_set_commission_percent", { _percent: percent });
+        if (!rpcError) await refresh();
+        return !rpcError;
+      },
+      markBookingPaid: async (id, method, ref) => {
+        if (!isAdmin) return "Admin access required";
+        const { error: rpcError } = await supabase.rpc("admin_mark_booking_paid", { _code: id, _method: method, _ref: ref.trim() });
+        if (!rpcError) { await refresh(); return null; }
+        return rpcError.message;
+      },
+      markWorkerPaid: async (id, ref) => {
+        if (!isAdmin) return "Admin access required";
+        const { error: rpcError } = await supabase.rpc("admin_mark_worker_paid", { _code: id, _ref: ref.trim() });
+        if (!rpcError) { await refresh(); return null; }
+        return rpcError.message;
+      },
       rewardPoints: profile?.reward_points ?? 0,
       commissionWallet: { total, withdrawn, pending, available: Math.max(0, total - withdrawn - pending) },
       refresh,
@@ -188,7 +221,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return !rpcError;
       },
     };
-  }, [loading, error, services, workers, bookings, withdrawals, vouchers, ratings, profile, user, isAdmin, refresh, refreshProfile]);
+  }, [loading, error, services, workers, bookings, withdrawals, vouchers, ratings, transactions, commissionPercent, profile, user, isAdmin, refresh, refreshProfile]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
