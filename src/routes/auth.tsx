@@ -5,6 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -41,10 +42,14 @@ function AuthPage() {
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
   const [busy, setBusy] = useState(false);
+  const [accountType, setAccountType] = useState<"user" | "worker">("user");
+  const [serviceId, setServiceId] = useState("");
+  const [exp, setExp] = useState("");
+  const { services } = useStore();
 
   useEffect(() => {
-    if (!loading && session) navigate({ to: "/", replace: true });
-  }, [loading, session, navigate]);
+    if (!loading && session) navigate({ to: isWorker ? "/worker-panel" : "/", replace: true });
+  }, [loading, session, isWorker, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,6 +59,10 @@ function AuthPage() {
     }
     if (mode === "signup" && !name.trim()) {
       toast.error("Apna naam likhein");
+      return;
+    }
+    if (mode === "signup" && accountType === "worker" && (!serviceId || !phone.trim() || !city.trim())) {
+      toast.error("Worker ke liye service, mobile aur sheher zaroori hai");
       return;
     }
     setBusy(true);
@@ -68,11 +77,13 @@ function AuthPage() {
               full_name: name.trim(),
               phone: phone.trim(),
               city: city.trim(),
+              account_type: accountType,
+              ...(accountType === "worker" ? { service_id: serviceId, exp_years: exp || "0" } : {}),
             },
           },
         });
         if (error) throw error;
-        toast.success("Account ban gaya — welcome!");
+        toast.success(accountType === "worker" ? "Worker account ban gaya — KYC verification pending" : "Account ban gaya — welcome!");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
@@ -81,7 +92,6 @@ function AuthPage() {
         if (error) throw error;
         toast.success("Login ho gaya");
       }
-      navigate({ to: "/", replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Kuch galat ho gaya";
       toast.error(msg);
@@ -117,6 +127,18 @@ function AuthPage() {
       <form onSubmit={submit} className="rise space-y-2.5 [animation-delay:60ms]">
         {mode === "signup" && (
           <>
+            <div className="grid grid-cols-2 gap-2">
+              {(["user", "worker"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setAccountType(t)}
+                  className={`rounded-2xl px-3 py-3 text-xs font-bold ring-1 transition ${accountType === t ? "bg-ink text-white ring-ink" : "bg-white/80 text-ink ring-white/60"}`}
+                >
+                  {t === "user" ? "🏠 Customer\nService lena hai" : "👷 Worker\nService dena hai"}
+                </button>
+              ))}
+            </div>
             <input
               className={inputCls}
               placeholder="Poora naam"
@@ -126,7 +148,7 @@ function AuthPage() {
             />
             <input
               className={inputCls}
-              placeholder="Mobile number (optional)"
+              placeholder={accountType === "worker" ? "Mobile number" : "Mobile number (optional)"}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               inputMode="tel"
@@ -134,10 +156,36 @@ function AuthPage() {
             />
             <input
               className={inputCls}
-              placeholder="Sheher (optional)"
+              placeholder={accountType === "worker" ? "Sheher" : "Sheher (optional)"}
               value={city}
               onChange={(e) => setCity(e.target.value)}
             />
+            {accountType === "worker" && (
+              <>
+                <select
+                  className={inputCls}
+                  value={serviceId}
+                  onChange={(e) => setServiceId(e.target.value)}
+                >
+                  <option value="">Aap kaunsi service denge?</option>
+                  {services.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.icon} {s.name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  className={inputCls}
+                  placeholder="Kitne saal ka anubhav? (jaise 3)"
+                  value={exp}
+                  onChange={(e) => setExp(e.target.value.replace(/[^0-9]/g, ""))}
+                  inputMode="numeric"
+                />
+                <p className="text-[11px] text-ink-soft">
+                  Worker account admin ke KYC verify karne ke baad customers ko dikhega.
+                </p>
+              </>
+            )}
           </>
         )}
         <input
