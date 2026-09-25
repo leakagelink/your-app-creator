@@ -34,7 +34,7 @@ const inputCls =
 
 function AuthPage() {
   const navigate = useNavigate();
-  const { session, loading } = useAuth();
+  const { session, loading, isWorker } = useAuth();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -133,7 +133,7 @@ function AuthPage() {
                   key={t}
                   type="button"
                   onClick={() => setAccountType(t)}
-                  className={`rounded-2xl px-3 py-3 text-xs font-bold ring-1 transition ${accountType === t ? "bg-ink text-white ring-ink" : "bg-white/80 text-ink ring-white/60"}`}
+                  className={`whitespace-pre-line rounded-2xl px-3 py-3 text-xs font-bold ring-1 transition ${accountType === t ? "bg-ink text-white ring-ink" : "bg-white/80 text-ink ring-white/60"}`}
                 >
                   {t === "user" ? "🏠 Customer\nService lena hai" : "👷 Worker\nService dena hai"}
                 </button>
