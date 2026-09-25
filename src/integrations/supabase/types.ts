@@ -331,6 +331,59 @@ export type Database = {
         }
         Relationships: []
       }
+      worker_kyc: {
+        Row: {
+          address: string
+          admin_note: string | null
+          full_name: string
+          id_number: string
+          id_type: string
+          payout_account: string
+          phone: string
+          reviewed_at: string | null
+          status: string
+          submitted_at: string
+          user_id: string
+          worker_id: string
+        }
+        Insert: {
+          address: string
+          admin_note?: string | null
+          full_name: string
+          id_number: string
+          id_type: string
+          payout_account: string
+          phone: string
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string
+          user_id: string
+          worker_id: string
+        }
+        Update: {
+          address?: string
+          admin_note?: string | null
+          full_name?: string
+          id_number?: string
+          id_type?: string
+          payout_account?: string
+          phone?: string
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string
+          user_id?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_kyc_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: true
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workers: {
         Row: {
           available: boolean
@@ -538,6 +591,21 @@ export type Database = {
       }
       set_own_worker_availability: {
         Args: { _available: boolean }
+        Returns: undefined
+      }
+      set_own_worker_service: {
+        Args: { _exp_years: number; _service_id: string }
+        Returns: undefined
+      }
+      submit_worker_kyc: {
+        Args: {
+          _address: string
+          _full_name: string
+          _id_number: string
+          _id_type: string
+          _payout_account: string
+          _phone: string
+        }
         Returns: undefined
       }
     }

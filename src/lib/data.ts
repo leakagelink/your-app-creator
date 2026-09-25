@@ -20,7 +20,7 @@ export type Worker = {
   img: string | null;
   userId: string | null;
   available: boolean;
-  kyc: "pending" | "verified";
+  kyc: "pending" | "submitted" | "verified" | "rejected";
 };
 
 export type BookingStatus =

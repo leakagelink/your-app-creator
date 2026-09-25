@@ -65,7 +65,7 @@ const mapWorker = (r: WorkerRow): Worker => ({
   id: r.id, userId: r.user_id, name: r.name, serviceId: r.service_id, role: r.role,
   expYears: r.exp_years, rating: Number(r.rating), jobsDone: r.jobs_done,
   distanceKm: Number(r.distance_km), img: r.photo.trim() || null, available: r.available,
-  kyc: r.kyc === "verified" ? "verified" : "pending",
+  kyc: r.kyc === "verified" || r.kyc === "submitted" || r.kyc === "rejected" ? r.kyc : "pending",
 });
 const mapBooking = (r: BookingRow): Booking => ({
   id: r.code, customerName: r.customer_name, customerPhone: r.customer_phone,
