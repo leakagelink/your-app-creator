@@ -16,7 +16,6 @@ import { Route as BookingsRouteImport } from './routes/bookings'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ServicesRouteImport } from './routes/services'
-import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as WorkerPanelRouteImport } from './routes/worker-panel'
 import { Route as ServiceServiceIdRouteImport } from './routes/service.$serviceId'
 import { Route as WorkerWorkerIdRouteImport } from './routes/worker.$workerId'
@@ -56,11 +55,6 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WalletRoute = WalletRouteImport.update({
-  id: '/wallet',
-  path: '/wallet',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const WorkerPanelRoute = WorkerPanelRouteImport.update({
   id: '/worker-panel',
   path: '/worker-panel',
@@ -85,7 +79,6 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
-  '/wallet': typeof WalletRoute
   '/worker-panel': typeof WorkerPanelRoute
   '/service/$serviceId': typeof ServiceServiceIdRoute
   '/worker/$workerId': typeof WorkerWorkerIdRoute
@@ -98,7 +91,6 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
-  '/wallet': typeof WalletRoute
   '/worker-panel': typeof WorkerPanelRoute
   '/service/$serviceId': typeof ServiceServiceIdRoute
   '/worker/$workerId': typeof WorkerWorkerIdRoute
@@ -112,7 +104,6 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRoute
-  '/wallet': typeof WalletRoute
   '/worker-panel': typeof WorkerPanelRoute
   '/service/$serviceId': typeof ServiceServiceIdRoute
   '/worker/$workerId': typeof WorkerWorkerIdRoute
@@ -127,7 +118,6 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/services'
-    | '/wallet'
     | '/worker-panel'
     | '/service/$serviceId'
     | '/worker/$workerId'
@@ -140,7 +130,6 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/services'
-    | '/wallet'
     | '/worker-panel'
     | '/service/$serviceId'
     | '/worker/$workerId'
@@ -153,7 +142,6 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/services'
-    | '/wallet'
     | '/worker-panel'
     | '/service/$serviceId'
     | '/worker/$workerId'
@@ -167,7 +155,6 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRoute
-  WalletRoute: typeof WalletRoute
   WorkerPanelRoute: typeof WorkerPanelRoute
   ServiceServiceIdRoute: typeof ServiceServiceIdRoute
   WorkerWorkerIdRoute: typeof WorkerWorkerIdRoute
@@ -224,13 +211,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/wallet': {
-      id: '/wallet'
-      path: '/wallet'
-      fullPath: '/wallet'
-      preLoaderRoute: typeof WalletRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/worker-panel': {
       id: '/worker-panel'
       path: '/worker-panel'
@@ -263,7 +243,6 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRoute,
-  WalletRoute: WalletRoute,
   WorkerPanelRoute: WorkerPanelRoute,
   ServiceServiceIdRoute: ServiceServiceIdRoute,
   WorkerWorkerIdRoute: WorkerWorkerIdRoute,
