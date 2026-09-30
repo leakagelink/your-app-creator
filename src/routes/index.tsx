@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { PolicyLinks } from "@/components/LegalPage";
 import { AppShell, SectionTitle } from "@/components/AppShell";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/lib/auth";
@@ -47,5 +48,5 @@ function HomePage() {
       {!loading && available.length === 0 ? <p className="rounded-3xl bg-glass/70 p-4 text-center text-xs text-ink-soft ring-1 ring-white/60">Abhi koi verified worker available nahi hai.</p> : null}
     </div></section>
     {user ? <section className="rise rounded-3xl bg-glass/80 p-4 ring-1 ring-white/60"><div className="flex items-center justify-between"><div><p className="text-sm font-bold">Aapke rewards</p><p className="text-[11px] text-ink-soft">Sirf verified payments par milte hain</p></div><span className="rounded-full bg-volt/15 px-2.5 py-1 text-xs font-bold text-volt">{rewardPoints} points</span></div></section> : null}
-  </AppShell>;
+  <PolicyLinks /></AppShell>;
 }
