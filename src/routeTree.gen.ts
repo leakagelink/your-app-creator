@@ -10,13 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BookingsRouteImport } from './routes/bookings'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RefundRouteImport } from './routes/refund'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ServiceDeliveryRouteImport } from './routes/service-delivery'
 import { Route as ServicesRouteImport } from './routes/services'
-import { Route as WalletRouteImport } from './routes/wallet'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WorkerPanelRouteImport } from './routes/worker-panel'
 import { Route as ServiceServiceIdRouteImport } from './routes/service.$serviceId'
 import { Route as WorkerWorkerIdRouteImport } from './routes/worker.$workerId'
@@ -24,6 +29,11 @@ import { Route as WorkerWorkerIdRouteImport } from './routes/worker.$workerId'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -41,9 +51,24 @@ const BookingsRoute = BookingsRouteImport.update({
   path: '/bookings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundRoute = RefundRouteImport.update({
+  id: '/refund',
+  path: '/refund',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -51,14 +76,19 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServiceDeliveryRoute = ServiceDeliveryRouteImport.update({
+  id: '/service-delivery',
+  path: '/service-delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WalletRoute = WalletRouteImport.update({
-  id: '/wallet',
-  path: '/wallet',
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkerPanelRoute = WorkerPanelRouteImport.update({
@@ -79,26 +109,36 @@ const WorkerWorkerIdRoute = WorkerWorkerIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/bookings': typeof BookingsRoute
+  '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/service-delivery': typeof ServiceDeliveryRoute
   '/services': typeof ServicesRoute
-  '/wallet': typeof WalletRoute
+  '/terms': typeof TermsRoute
   '/worker-panel': typeof WorkerPanelRoute
   '/service/$serviceId': typeof ServiceServiceIdRoute
   '/worker/$workerId': typeof WorkerWorkerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/bookings': typeof BookingsRoute
+  '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/service-delivery': typeof ServiceDeliveryRoute
   '/services': typeof ServicesRoute
-  '/wallet': typeof WalletRoute
+  '/terms': typeof TermsRoute
   '/worker-panel': typeof WorkerPanelRoute
   '/service/$serviceId': typeof ServiceServiceIdRoute
   '/worker/$workerId': typeof WorkerWorkerIdRoute
@@ -106,13 +146,18 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/bookings': typeof BookingsRoute
+  '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/refund': typeof RefundRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/service-delivery': typeof ServiceDeliveryRoute
   '/services': typeof ServicesRoute
-  '/wallet': typeof WalletRoute
+  '/terms': typeof TermsRoute
   '/worker-panel': typeof WorkerPanelRoute
   '/service/$serviceId': typeof ServiceServiceIdRoute
   '/worker/$workerId': typeof WorkerWorkerIdRoute
@@ -121,39 +166,54 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/admin'
     | '/auth'
     | '/bookings'
+    | '/contact'
+    | '/privacy'
     | '/profile'
+    | '/refund'
     | '/reset-password'
+    | '/service-delivery'
     | '/services'
-    | '/wallet'
+    | '/terms'
     | '/worker-panel'
     | '/service/$serviceId'
     | '/worker/$workerId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/admin'
     | '/auth'
     | '/bookings'
+    | '/contact'
+    | '/privacy'
     | '/profile'
+    | '/refund'
     | '/reset-password'
+    | '/service-delivery'
     | '/services'
-    | '/wallet'
+    | '/terms'
     | '/worker-panel'
     | '/service/$serviceId'
     | '/worker/$workerId'
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/admin'
     | '/auth'
     | '/bookings'
+    | '/contact'
+    | '/privacy'
     | '/profile'
+    | '/refund'
     | '/reset-password'
+    | '/service-delivery'
     | '/services'
-    | '/wallet'
+    | '/terms'
     | '/worker-panel'
     | '/service/$serviceId'
     | '/worker/$workerId'
@@ -161,13 +221,18 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   BookingsRoute: typeof BookingsRoute
+  ContactRoute: typeof ContactRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
+  RefundRoute: typeof RefundRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ServiceDeliveryRoute: typeof ServiceDeliveryRoute
   ServicesRoute: typeof ServicesRoute
-  WalletRoute: typeof WalletRoute
+  TermsRoute: typeof TermsRoute
   WorkerPanelRoute: typeof WorkerPanelRoute
   ServiceServiceIdRoute: typeof ServiceServiceIdRoute
   WorkerWorkerIdRoute: typeof WorkerWorkerIdRoute
@@ -180,6 +245,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -203,11 +275,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BookingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund': {
+      id: '/refund'
+      path: '/refund'
+      fullPath: '/refund'
+      preLoaderRoute: typeof RefundRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -217,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/service-delivery': {
+      id: '/service-delivery'
+      path: '/service-delivery'
+      fullPath: '/service-delivery'
+      preLoaderRoute: typeof ServiceDeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/services': {
       id: '/services'
       path: '/services'
@@ -224,11 +324,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/wallet': {
-      id: '/wallet'
-      path: '/wallet'
-      fullPath: '/wallet'
-      preLoaderRoute: typeof WalletRouteImport
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/worker-panel': {
@@ -257,13 +357,18 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   BookingsRoute: BookingsRoute,
+  ContactRoute: ContactRoute,
+  PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
+  RefundRoute: RefundRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ServiceDeliveryRoute: ServiceDeliveryRoute,
   ServicesRoute: ServicesRoute,
-  WalletRoute: WalletRoute,
+  TermsRoute: TermsRoute,
   WorkerPanelRoute: WorkerPanelRoute,
   ServiceServiceIdRoute: ServiceServiceIdRoute,
   WorkerWorkerIdRoute: WorkerWorkerIdRoute,

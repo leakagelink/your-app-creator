@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { PolicyLinks } from "@/components/LegalPage";
 import { AppShell, SectionTitle } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 
@@ -113,7 +114,7 @@ function ProfilePage() {
               <div>
                 <p className="text-sm font-bold">Admin Panel (Malik)</p>
                 <p className="text-[11px] text-white/60">
-                  Commission wallet, bookings, users, KYC
+                  Commission, bookings, users, KYC
                 </p>
               </div>
             </div>
@@ -125,6 +126,6 @@ function ProfilePage() {
       <p className="rise pt-2 text-center font-mono text-[10px] text-ink-soft [animation-delay:240ms]">
         Badre Electrician Service · badreelectricianservice.online
       </p>
-    </AppShell>
+    <PolicyLinks /></AppShell>
   );
 }
