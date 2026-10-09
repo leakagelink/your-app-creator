@@ -5,6 +5,7 @@ const navItems = [
   { to: "/", icon: "🏠", label: "Home" },
   { to: "/bookings", icon: "📋", label: "Bookings" },
   { to: "/services", icon: "＋", label: "", fab: true },
+  { to: "/wallet", icon: "👛", label: "Wallet" },
   { to: "/contact", icon: "☎️", label: "Contact" },
   { to: "/profile", icon: "👤", label: "Profile" },
 ] as const;
@@ -34,7 +35,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   key={i}
                   to={item.to}
-                  className={`flex flex-col items-center gap-0.5 px-3 ${
+                  className={`flex flex-col items-center gap-0.5 px-1.5 ${
                     pathname === item.to ? "text-volt" : "text-ink-soft"
                   }`}
                 >
