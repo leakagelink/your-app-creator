@@ -33,21 +33,36 @@ export type Database = {
         Row: {
           commission_percent: number
           id: number
+          merchant_account_holder: string
+          merchant_account_number: string
+          merchant_bank_name: string
+          merchant_ifsc: string
           merchant_name: string
+          merchant_qr_path: string
           merchant_upi_id: string
           updated_at: string
         }
         Insert: {
           commission_percent?: number
           id?: number
+          merchant_account_holder?: string
+          merchant_account_number?: string
+          merchant_bank_name?: string
+          merchant_ifsc?: string
           merchant_name?: string
+          merchant_qr_path?: string
           merchant_upi_id?: string
           updated_at?: string
         }
         Update: {
           commission_percent?: number
           id?: number
+          merchant_account_holder?: string
+          merchant_account_number?: string
+          merchant_bank_name?: string
+          merchant_ifsc?: string
           merchant_name?: string
+          merchant_qr_path?: string
           merchant_upi_id?: string
           updated_at?: string
         }
@@ -636,6 +651,18 @@ export type Database = {
       }
       admin_set_commission_percent: {
         Args: { _percent: number }
+        Returns: undefined
+      }
+      admin_set_merchant_payment_details: {
+        Args: {
+          _account: string
+          _bank_name: string
+          _holder: string
+          _ifsc: string
+          _name: string
+          _qr_path: string
+          _upi: string
+        }
         Returns: undefined
       }
       admin_set_merchant_upi: {

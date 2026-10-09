@@ -92,6 +92,13 @@
       "when": 1791530562853,
       "tag": "0012_wallet_deposits_worker_withdrawals",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791532620245,
+      "tag": "0013_admin_merchant_bank_qr_settings",
+      "breakpoints": true
     }
   ]
 }
