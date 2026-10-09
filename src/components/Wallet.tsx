@@ -5,6 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { inr, useStore } from "@/lib/store";
 import { SectionTitle } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
+import { MerchantQr, useMerchantUpi } from "@/components/MerchantPayments";
+import { hasMerchantPayment } from "@/lib/merchant-payments";
+export { AdminMerchantUpi, useMerchantUpi } from "@/components/MerchantPayments";
 
 const card = "rounded-3xl bg-glass/80 p-4 ring-1 ring-white/60";
 const input = "w-full rounded-2xl bg-ink/5 px-3 py-2.5 text-sm outline-none";
@@ -17,16 +21,6 @@ type WWithdrawal = { code: string; worker_id: string; amount: number; method_typ
 export const depositLabels: Record<string, string> = { awaiting_payment: "Payment baaki", pending: "Admin review mein", approved: "Approved ✓", rejected: "Rejected", expired: "Samay khatam" };
 export const wwLabels: Record<string, string> = { pending: "Pending", processing: "Processing", paid: "Paid ✓", rejected: "Rejected" };
 const err = (e: { message: string } | null) => e?.message ?? "Kuch galat hua";
-
-export function useMerchantUpi() {
-  const [upi, setUpi] = useState({ id: "", name: "" });
-  const load = useCallback(async () => {
-    const { data } = await supabase.from("app_settings").select("merchant_upi_id, merchant_name").eq("id", 1).maybeSingle();
-    if (data) setUpi({ id: data.merchant_upi_id, name: data.merchant_name });
-  }, []);
-  useEffect(() => { void load(); }, [load]);
-  return { upi, reload: load };
-}
 
 function Countdown({ until, onEnd }: { until: string; onEnd: () => void }) {
   const [left, setLeft] = useState(() => Math.max(0, new Date(until).getTime() - Date.now()));
@@ -77,17 +71,18 @@ export function CustomerWallet() {
 
   return <>
     <section className="rounded-3xl bg-ink p-5 text-white"><p className="text-[11px] text-white/60">Wallet balance</p><p className="font-mono text-3xl font-bold">{inr(balance)}</p><p className="text-[11px] text-white/60">Admin approve karne ke baad hi paisa judta hai</p></section>
-    {!active ? <section className={card}><SectionTitle>Paise jodein (UPI / QR)</SectionTitle>
-      {!upi.id ? <p className="text-xs text-ink-soft">Admin ne abhi UPI ID set nahi ki hai. Thodi der baad try karein.</p> : <>
+    {!active ? <section className={card}><SectionTitle>Paise jodein (Bank / UPI / QR)</SectionTitle>
+      {!hasMerchantPayment(upi) ? <p className="text-xs text-ink-soft">Admin ne abhi payment details set nahi ki hain. Thodi der baad try karein.</p> : <>
         <input value={amount} onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="Amount (₹10 – ₹1,00,000)" className={input} />
         <div className="mt-2 flex gap-1.5">{[200, 500, 1000, 2000].map((v) => <button key={v} onClick={() => setAmount(String(v))} className="flex-1 rounded-xl bg-ink/5 py-1.5 text-[11px] font-bold">₹{v}</button>)}</div>
         <button disabled={busy} onClick={() => void start()} className={`mt-2 ${btn}`}>Aage badhein</button></>}
     </section> : <section className={`${card} space-y-3`}>
       <SectionTitle tag={active.code}>{inr(active.amount)} pay karein</SectionTitle>
       <Countdown until={active.expires_at} onEnd={() => { toast.error("10 minute khatam — dobara shuru karein"); setActive(null); void load(); }} />
-      <div className="mx-auto w-fit rounded-2xl bg-paper p-3"><QRCodeSVG value={upiLink} size={190} /></div>
-      <p className="text-center text-xs text-ink-soft">Kisi bhi UPI app se QR scan karein ya UPI ID par bhejein:<br /><span className="font-mono font-bold text-ink">{upi.id}</span></p>
-      <a href={upiLink} className="block rounded-2xl bg-lav py-3 text-center text-sm font-bold text-white">UPI app se pay karein</a>
+      {upi.qrPath ? <MerchantQr path={upi.qrPath} /> : upi.id ? <div className="mx-auto w-fit rounded-lg bg-paper p-3"><QRCodeSVG value={upiLink} size={190} /></div> : null}
+      {(upi.id || upi.qrPath) ? <p className="text-center text-xs font-bold text-ink">{upi.name}</p> : null}
+      {upi.id ? <><p className="break-all text-center font-mono text-xs font-bold text-ink">{upi.id}</p><Button asChild className="w-full"><a href={upiLink}>UPI app se pay karein</a></Button></> : null}
+      {upi.account ? <dl className="space-y-1 border-y border-ink/10 py-3 text-xs"><div><dt className="text-ink-soft">Bank</dt><dd className="break-words font-bold">{upi.bankName}</dd></div><div><dt className="text-ink-soft">Account holder</dt><dd className="break-words font-bold">{upi.holder}</dd></div><div><dt className="text-ink-soft">Account number</dt><dd className="break-all font-mono font-bold">{upi.account}</dd></div><div><dt className="text-ink-soft">IFSC</dt><dd className="font-mono font-bold">{upi.ifsc}</dd></div></dl> : null}
       <input value={utr} onChange={(e) => setUtr(e.target.value.replace(/[^A-Za-z0-9]/g, ""))} placeholder="Transaction ID / UTR (12 digit)" className={input} />
       <button disabled={busy || utr.length < 8} onClick={() => void submit()} className={btn}>Transaction ID submit karein</button>
       <button onClick={() => setActive(null)} className="w-full text-xs font-bold text-ink-soft">Cancel</button>
@@ -174,14 +169,6 @@ export function WorkerWallet() {
 }
 
 /* ---------------- Admin ---------------- */
-export function AdminMerchantUpi() {
-  const { upi, reload } = useMerchantUpi();
-  const [id, setId] = useState(""); const [name, setName] = useState("");
-  useEffect(() => { setId(upi.id); setName(upi.name); }, [upi]);
-  const save = async () => { const { error } = await supabase.rpc("admin_set_merchant_upi", { _upi: id, _name: name }); if (error) toast.error(err(error)); else { toast.success("UPI ID save ho gayi"); void reload(); } };
-  return <section className={card}><SectionTitle>Payment lene ki UPI ID</SectionTitle><p className="mb-2 text-[11px] text-ink-soft">Customers isi UPI ID par QR se paisa bhejenge.</p><input value={id} onChange={(e) => setId(e.target.value.trim())} placeholder="aapki-upi@bank" className={input} /><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Naam (QR par dikhega)" className={`mt-2 ${input}`} /><button onClick={() => void save()} className={`mt-2 ${btn}`}>Save</button></section>;
-}
-
 export function AdminDeposits() {
   const { refresh } = useStore();
   const [list, setList] = useState<Deposit[]>([]);
