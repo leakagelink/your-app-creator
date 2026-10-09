@@ -33,16 +33,22 @@ export type Database = {
         Row: {
           commission_percent: number
           id: number
+          merchant_name: string
+          merchant_upi_id: string
           updated_at: string
         }
         Insert: {
           commission_percent?: number
           id?: number
+          merchant_name?: string
+          merchant_upi_id?: string
           updated_at?: string
         }
         Update: {
           commission_percent?: number
           id?: number
+          merchant_name?: string
+          merchant_upi_id?: string
           updated_at?: string
         }
         Relationships: []
@@ -136,6 +142,42 @@ export type Database = {
           },
         ]
       }
+      payout_methods: {
+        Row: {
+          account_number: string | null
+          created_at: string
+          holder_name: string
+          id: string
+          ifsc: string | null
+          method_type: string
+          qr_path: string | null
+          upi_id: string | null
+          user_id: string
+        }
+        Insert: {
+          account_number?: string | null
+          created_at?: string
+          holder_name: string
+          id?: string
+          ifsc?: string | null
+          method_type: string
+          qr_path?: string | null
+          upi_id?: string | null
+          user_id: string
+        }
+        Update: {
+          account_number?: string | null
+          created_at?: string
+          holder_name?: string
+          id?: string
+          ifsc?: string | null
+          method_type?: string
+          qr_path?: string | null
+          upi_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           city: string | null
@@ -145,6 +187,7 @@ export type Database = {
           phone: string | null
           reward_points: number
           updated_at: string
+          wallet_balance: number
         }
         Insert: {
           city?: string | null
@@ -154,6 +197,7 @@ export type Database = {
           phone?: string | null
           reward_points?: number
           updated_at?: string
+          wallet_balance?: number
         }
         Update: {
           city?: string | null
@@ -163,6 +207,7 @@ export type Database = {
           phone?: string | null
           reward_points?: number
           updated_at?: string
+          wallet_balance?: number
         }
         Relationships: []
       }
@@ -304,6 +349,45 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_deposits: {
+        Row: {
+          admin_note: string | null
+          amount: number
+          code: string
+          created_at: string
+          expires_at: string
+          reviewed_at: string | null
+          status: string
+          submitted_at: string | null
+          user_id: string
+          utr: string | null
+        }
+        Insert: {
+          admin_note?: string | null
+          amount: number
+          code?: string
+          created_at?: string
+          expires_at?: string
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          user_id: string
+          utr?: string | null
+        }
+        Update: {
+          admin_note?: string | null
+          amount?: number
+          code?: string
+          created_at?: string
+          expires_at?: string
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          user_id?: string
+          utr?: string | null
+        }
+        Relationships: []
+      }
       withdrawals: {
         Row: {
           account: string
@@ -384,6 +468,48 @@ export type Database = {
           },
         ]
       }
+      worker_withdrawals: {
+        Row: {
+          amount: number
+          code: string
+          created_at: string
+          destination: string
+          method_type: string
+          payout_ref: string | null
+          qr_path: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          worker_id: string
+        }
+        Insert: {
+          amount: number
+          code?: string
+          created_at?: string
+          destination: string
+          method_type: string
+          payout_ref?: string | null
+          qr_path?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          worker_id: string
+        }
+        Update: {
+          amount?: number
+          code?: string
+          created_at?: string
+          destination?: string
+          method_type?: string
+          payout_ref?: string | null
+          qr_path?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          worker_id?: string
+        }
+        Relationships: []
+      }
       workers: {
         Row: {
           available: boolean
@@ -437,6 +563,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_payout_method: {
+        Args: {
+          _account: string
+          _holder: string
+          _ifsc: string
+          _qr_path: string
+          _type: string
+          _upi: string
+        }
+        Returns: undefined
+      }
       add_reward_points: { Args: { _points: number }; Returns: number }
       admin_link_worker: {
         Args: {
@@ -493,8 +630,16 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      admin_review_deposit: {
+        Args: { _approve: boolean; _code: string; _note: string }
+        Returns: undefined
+      }
       admin_set_commission_percent: {
         Args: { _percent: number }
+        Returns: undefined
+      }
+      admin_set_merchant_upi: {
+        Args: { _name: string; _upi: string }
         Returns: undefined
       }
       admin_set_withdrawal_status: {
@@ -503,6 +648,10 @@ export type Database = {
       }
       admin_set_worker_kyc: {
         Args: { _kyc: string; _worker_id: string }
+        Returns: undefined
+      }
+      admin_set_worker_withdrawal: {
+        Args: { _code: string; _ref: string; _status: string }
         Returns: undefined
       }
       admin_update_service: {
@@ -564,6 +713,8 @@ export type Database = {
         Returns: boolean
       }
       mark_payout_due_if_ready: { Args: { _code: string }; Returns: undefined }
+      my_worker_balance: { Args: never; Returns: number }
+      pay_booking_from_wallet: { Args: { _code: string }; Returns: undefined }
       rate_own_booking: {
         Args: { _code: string; _rating: number }
         Returns: undefined
@@ -585,6 +736,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      request_worker_withdrawal: {
+        Args: { _amount: number; _method_id: string }
+        Returns: undefined
+      }
       set_assigned_booking_status: {
         Args: { _code: string; _status: string }
         Returns: undefined
@@ -595,6 +750,31 @@ export type Database = {
       }
       set_own_worker_service: {
         Args: { _exp_years: number; _service_id: string }
+        Returns: undefined
+      }
+      start_wallet_deposit: {
+        Args: { _amount: number }
+        Returns: {
+          admin_note: string | null
+          amount: number
+          code: string
+          created_at: string
+          expires_at: string
+          reviewed_at: string | null
+          status: string
+          submitted_at: string | null
+          user_id: string
+          utr: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "wallet_deposits"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      submit_deposit_utr: {
+        Args: { _code: string; _utr: string }
         Returns: undefined
       }
       submit_worker_kyc: {
@@ -608,6 +788,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      worker_available_balance: { Args: { _user: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "worker" | "user"
