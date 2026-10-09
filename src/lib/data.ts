@@ -85,7 +85,7 @@ export function workerPayout(b: Booking) {
 
 export type Transaction = {
   id: string;
-  type: "customer_payment" | "commission_credit" | "worker_payout_due" | "worker_payout_paid" | "commission_withdrawal";
+  type: "customer_payment" | "commission_credit" | "worker_payout_due" | "worker_payout_paid" | "commission_withdrawal" | "wallet_deposit";
   amount: number;
   bookingCode: string | null;
   workerId: string | null;
@@ -100,4 +100,5 @@ export const txnLabels: Record<Transaction["type"], string> = {
   worker_payout_due: "Worker payout due",
   worker_payout_paid: "Worker payout paid",
   commission_withdrawal: "Admin withdrawal",
+  wallet_deposit: "Customer wallet deposit",
 };
