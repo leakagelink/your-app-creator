@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { PolicyLinks } from "@/components/LegalPage";
+import { ApkDownloadBanner } from "@/components/ApkDownload";
 import { AppShell, SectionTitle } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 
@@ -81,6 +82,7 @@ function ProfilePage() {
           </>
         )}
       </section>
+      <ApkDownloadBanner />
 
       {/* role panels */}
       {user && (isAdmin || isWorker) ? <section className="rise [animation-delay:120ms]">

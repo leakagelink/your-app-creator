@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PolicyLinks } from "@/components/LegalPage";
+import { ApkDownloadBanner } from "@/components/ApkDownload";
 import { AppShell, SectionTitle } from "@/components/AppShell";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/lib/auth";
@@ -36,6 +37,7 @@ function HomePage() {
       <div className="flex min-w-0 items-center gap-3"><Logo className="size-11" /><div className="min-w-0"><p className="text-[11px] text-ink-soft">Namaste{displayName ? "," : ""}</p><p className="truncate text-base font-extrabold">{displayName || "Badre Electrician Service"}</p></div></div>
       {profile?.city ? <span className="shrink-0 rounded-full bg-glass/70 px-3 py-2 text-xs font-semibold text-ink-soft ring-1 ring-white/60">📍 {profile.city}</span> : null}
     </header>
+    <ApkDownloadBanner />
     <section className="rise flex items-center justify-between rounded-3xl bg-ink px-4 py-3 text-white shadow-md"><div><p className="text-[11px] text-white/60">Badre Electrician Service</p><p className="text-sm font-bold">होम सर्विस</p></div><span className="rounded-full bg-volt/20 px-2.5 py-1 text-[11px] font-semibold text-volt">Live</span></section>
     <div className="rise"><h1 className="font-display text-[2rem] leading-none">होम सर्विस</h1><p className="mt-1.5 text-sm text-ink-soft">Database mein registered local workers.</p></div>
     {error ? <p className="rounded-2xl bg-red/10 p-3 text-xs font-semibold text-red">Live data load nahi hua. Dobara kholein.</p> : null}
