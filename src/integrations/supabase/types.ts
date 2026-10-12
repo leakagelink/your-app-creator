@@ -29,6 +29,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_release: {
+        Row: {
+          apk_path: string | null
+          file_size: number | null
+          id: number
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          apk_path?: string | null
+          file_size?: number | null
+          id?: number
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          apk_path?: string | null
+          file_size?: number | null
+          id?: number
+          updated_at?: string
+          version?: string | null
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           commission_percent: number

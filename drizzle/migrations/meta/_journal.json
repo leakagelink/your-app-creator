@@ -99,6 +99,13 @@
       "when": 1791532620245,
       "tag": "0013_admin_merchant_bank_qr_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791817234484,
+      "tag": "0014_migration",
+      "breakpoints": true
     }
   ]
 }
