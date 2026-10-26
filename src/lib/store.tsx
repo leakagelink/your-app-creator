@@ -55,7 +55,7 @@ type StoreContextValue = {
 const StoreContext = createContext<StoreContextValue | null>(null);
 
 type WorkerRow = { id: string; user_id: string | null; name: string; service_id: string; role: string; exp_years: number; rating: number | string; jobs_done: number; distance_km: number | string; photo: string; available: boolean; kyc: string; lat?: number | string | null; lng?: number | string | null; area?: string | null };
-type BookingRow = { code: string; customer_name: string; customer_phone: string; worker_id: string; service_id: string; amount: number; commission: number; booking_date: string; booking_time: string; address: string; status: string; payment: string; rating: number | null; created_at: string; worker_payout: number; commission_percent: number | string; payout_status: string; payment_method: string | null; payment_ref: string | null; payout_ref: string | null };
+type BookingRow = { code: string; customer_name: string; customer_phone: string; worker_id: string; service_id: string; amount: number; commission: number; booking_date: string; booking_time: string; address: string; status: string; payment: string; rating: number | null; created_at: string; worker_payout: number; commission_percent: number | string; payout_status: string; payment_method: string | null; payment_ref: string | null; payout_ref: string | null; original_amount?: number | null; bill_amount?: number | null; bill_note?: string | null; bill_status?: string | null };
 type WithdrawalRow = { code: string; amount: number; status: string; account: string; requested_on: string };
 
 const mapService = (r: { id: string; name: string; icon: string; tint: string; price: number | null; commission: number | null; status: string }): Service => ({
@@ -77,6 +77,8 @@ const mapBooking = (r: BookingRow): Booking => ({
   workerPayout: r.worker_payout ?? r.amount - r.commission, commissionPercent: Number(r.commission_percent ?? 4),
   payoutStatus: (r.payout_status === "due" || r.payout_status === "paid" ? r.payout_status : "not_due"),
   paymentMethod: r.payment_method ?? null, paymentRef: r.payment_ref ?? null, payoutRef: r.payout_ref ?? null,
+  originalAmount: r.original_amount ?? null, billAmount: r.bill_amount ?? null, billNote: r.bill_note ?? null,
+  billStatus: (r.bill_status === "pending" || r.bill_status === "accepted" || r.bill_status === "rejected" ? r.bill_status : "none"),
 });
 const mapWithdrawal = (r: WithdrawalRow): Withdrawal => ({ id: r.code, amount: r.amount, status: r.status as WithdrawalStatus, date: r.requested_on, account: r.account });
 

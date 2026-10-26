@@ -61,6 +61,10 @@ export type Booking = {
   paymentMethod: string | null;
   paymentRef: string | null;
   payoutRef: string | null;
+  originalAmount: number | null;
+  billAmount: number | null;
+  billNote: string | null;
+  billStatus: "none" | "pending" | "accepted" | "rejected";
 };
 
 export type WithdrawalStatus = "pending" | "processing" | "paid" | "failed";
