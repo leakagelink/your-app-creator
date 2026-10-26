@@ -1,0 +1,1 @@
+REVOKE UPDATE, INSERT ON public.bookings FROM authenticated, anon;

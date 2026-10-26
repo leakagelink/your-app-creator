@@ -127,6 +127,13 @@
       "when": 1793033101259,
       "tag": "0017_booking_revised_bill",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793033286673,
+      "tag": "0018_lock_direct_booking_updates",
+      "breakpoints": true
     }
   ]
 }
