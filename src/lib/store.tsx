@@ -54,7 +54,7 @@ type StoreContextValue = {
 
 const StoreContext = createContext<StoreContextValue | null>(null);
 
-type WorkerRow = { id: string; user_id: string | null; name: string; service_id: string; role: string; exp_years: number; rating: number | string; jobs_done: number; distance_km: number | string; photo: string; available: boolean; kyc: string };
+type WorkerRow = { id: string; user_id: string | null; name: string; service_id: string; role: string; exp_years: number; rating: number | string; jobs_done: number; distance_km: number | string; photo: string; available: boolean; kyc: string; lat?: number | string | null; lng?: number | string | null; area?: string | null };
 type BookingRow = { code: string; customer_name: string; customer_phone: string; worker_id: string; service_id: string; amount: number; commission: number; booking_date: string; booking_time: string; address: string; status: string; payment: string; rating: number | null; created_at: string; worker_payout: number; commission_percent: number | string; payout_status: string; payment_method: string | null; payment_ref: string | null; payout_ref: string | null };
 type WithdrawalRow = { code: string; amount: number; status: string; account: string; requested_on: string };
 
@@ -66,6 +66,7 @@ const mapWorker = (r: WorkerRow): Worker => ({
   expYears: r.exp_years, rating: Number(r.rating), jobsDone: r.jobs_done,
   distanceKm: Number(r.distance_km), img: r.photo.trim() || null, available: r.available,
   kyc: r.kyc === "verified" || r.kyc === "submitted" || r.kyc === "rejected" ? r.kyc : "pending",
+  lat: r.lat == null ? null : Number(r.lat), lng: r.lng == null ? null : Number(r.lng), area: r.area ?? "",
 });
 const mapBooking = (r: BookingRow): Booking => ({
   id: r.code, customerName: r.customer_name, customerPhone: r.customer_phone,

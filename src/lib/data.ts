@@ -21,7 +21,16 @@ export type Worker = {
   userId: string | null;
   available: boolean;
   kyc: "pending" | "submitted" | "verified" | "rejected";
+  lat: number | null;
+  lng: number | null;
+  area: string;
 };
+
+export function distanceKm(aLat: number, aLng: number, bLat: number, bLng: number) {
+  const r = (d: number) => (d * Math.PI) / 180;
+  const x = Math.sin(r(bLat - aLat) / 2) ** 2 + Math.cos(r(aLat)) * Math.cos(r(bLat)) * Math.sin(r(bLng - aLng) / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+}
 
 export type BookingStatus =
   | "pending"

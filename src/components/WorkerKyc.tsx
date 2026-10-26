@@ -106,3 +106,25 @@ export function AdminKycReview() {
     </section>
   );
 }
+
+export function WorkerLocationEditor({ worker }: { worker: Worker }) {
+  const { refresh } = useStore();
+  const [area, setArea] = useState(worker.area);
+  const [busy, setBusy] = useState(false);
+  const save = () => {
+    if (!navigator.geolocation) { toast.error("Is phone mein location support nahi hai"); return; }
+    setBusy(true);
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { error } = await supabase.rpc("set_own_worker_location", { _lat: pos.coords.latitude, _lng: pos.coords.longitude, _area: area });
+      setBusy(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Location save ho gayi — ab paas ke customer aapko dekh payenge"); await refresh();
+    }, () => { setBusy(false); toast.error("Location permission allow karein"); }, { enableHighAccuracy: true, timeout: 15000 });
+  };
+  return <section className="rounded-3xl bg-glass/80 p-4 ring-1 ring-white/60">
+    <p className="text-sm font-bold">📍 Meri kaam ki location</p>
+    <p className="text-[11px] text-ink-soft">{worker.lat != null ? `Saved${worker.area ? ` · ${worker.area}` : ""}` : "Abhi location save nahi hai — customers ko aap 'paas mein' nahi dikhenge"}</p>
+    <input value={area} onChange={(e) => setArea(e.target.value)} placeholder="Area / mohalla (jaise: Civil Lines, Nagpur)" className="mt-2 w-full rounded-2xl bg-glass/75 px-4 py-2.5 text-sm ring-1 ring-white/60 outline-none" />
+    <button onClick={save} disabled={busy} className="mt-2 w-full rounded-2xl bg-ink py-2.5 text-xs font-bold text-white disabled:opacity-50">{busy ? "Location le rahe hain..." : "Abhi ki GPS location save karein"}</button>
+  </section>;
+}
