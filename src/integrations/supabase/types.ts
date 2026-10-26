@@ -815,6 +815,10 @@ export type Database = {
         Args: { _area: string; _lat: number; _lng: number }
         Returns: undefined
       }
+      set_own_worker_profile: {
+        Args: { _name: string; _photo: string }
+        Returns: undefined
+      }
       set_own_worker_service: {
         Args: { _exp_years: number; _service_id: string }
         Returns: undefined
