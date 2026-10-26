@@ -551,6 +551,7 @@ export type Database = {
       }
       workers: {
         Row: {
+          area: string
           available: boolean
           created_at: string
           distance_km: number
@@ -558,6 +559,8 @@ export type Database = {
           id: string
           jobs_done: number
           kyc: string
+          lat: number | null
+          lng: number | null
           name: string
           photo: string
           rating: number
@@ -566,6 +569,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          area?: string
           available?: boolean
           created_at?: string
           distance_km?: number
@@ -573,6 +577,8 @@ export type Database = {
           id: string
           jobs_done?: number
           kyc?: string
+          lat?: number | null
+          lng?: number | null
           name: string
           photo?: string
           rating?: number
@@ -581,6 +587,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          area?: string
           available?: boolean
           created_at?: string
           distance_km?: number
@@ -588,6 +595,8 @@ export type Database = {
           id?: string
           jobs_done?: number
           kyc?: string
+          lat?: number | null
+          lng?: number | null
           name?: string
           photo?: string
           rating?: number
@@ -623,6 +632,7 @@ export type Database = {
           _service_id: string
         }
         Returns: {
+          area: string
           available: boolean
           created_at: string
           distance_km: number
@@ -630,6 +640,8 @@ export type Database = {
           id: string
           jobs_done: number
           kyc: string
+          lat: number | null
+          lng: number | null
           name: string
           photo: string
           rating: number
@@ -797,6 +809,10 @@ export type Database = {
       }
       set_own_worker_availability: {
         Args: { _available: boolean }
+        Returns: undefined
+      }
+      set_own_worker_location: {
+        Args: { _area: string; _lat: number; _lng: number }
         Returns: undefined
       }
       set_own_worker_service: {
