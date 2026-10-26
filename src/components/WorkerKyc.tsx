@@ -128,3 +128,49 @@ export function WorkerLocationEditor({ worker }: { worker: Worker }) {
     <button onClick={save} disabled={busy} className="mt-2 w-full rounded-2xl bg-ink py-2.5 text-xs font-bold text-white disabled:opacity-50">{busy ? "Location le rahe hain..." : "Abhi ki GPS location save karein"}</button>
   </section>;
 }
+
+function resizeToJpeg(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const size = 320; const c = document.createElement("canvas"); c.width = size; c.height = size;
+      const s = Math.min(img.width, img.height); const ctx = c.getContext("2d");
+      if (!ctx) { reject(new Error("canvas")); return; }
+      ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+      URL.revokeObjectURL(img.src); resolve(c.toDataURL("image/jpeg", 0.8));
+    };
+    img.onerror = () => reject(new Error("image"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+export function WorkerProfileEditor({ worker }: { worker: Worker }) {
+  const { refresh } = useStore();
+  const [name, setName] = useState(worker.name);
+  const [photo, setPhoto] = useState<string | null>(worker.img);
+  const [changed, setChanged] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const pick = async (file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Sirf photo chunein"); return; }
+    try { setPhoto(await resizeToJpeg(file)); setChanged(true); } catch { toast.error("Photo load nahi hui"); }
+  };
+  const save = async () => {
+    setBusy(true);
+    const { error } = await supabase.rpc("set_own_worker_profile", { _name: name, _photo: changed && photo ? photo : "" });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Profile save ho gayi"); setChanged(false); await refresh();
+  };
+  return <section className="rounded-3xl bg-glass/80 p-4 ring-1 ring-white/60">
+    <p className="text-sm font-bold">👤 Meri profile</p>
+    <p className="text-[11px] text-ink-soft">Customer aapki photo aur naam dekhkar booking karenge</p>
+    <div className="mt-3 flex items-center gap-3">
+      {photo ? <img src={photo} alt={name} className="size-20 rounded-2xl object-cover" /> : <div className="grid size-20 place-items-center rounded-2xl bg-ink font-display text-3xl text-amber">{name.charAt(0).toUpperCase() || "?"}</div>}
+      <label className="cursor-pointer rounded-full bg-volt px-4 py-2 text-xs font-bold text-white">📷 Photo chunein<input type="file" accept="image/*" className="hidden" onChange={(e) => void pick(e.target.files?.[0])} /></label>
+    </div>
+    <label className="mt-3 block text-[11px] font-semibold text-ink-soft">Aapka naam</label>
+    <input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-2xl bg-glass/75 px-4 py-2.5 text-sm ring-1 ring-white/60 outline-none" />
+    <button onClick={save} disabled={busy || name.trim().length < 2} className="mt-3 w-full rounded-2xl bg-ink py-2.5 text-xs font-bold text-white disabled:opacity-50">{busy ? "Save ho raha hai..." : "Profile save karein"}</button>
+  </section>;
+}
