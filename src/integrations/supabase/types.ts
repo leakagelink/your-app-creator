@@ -96,6 +96,10 @@ export type Database = {
         Row: {
           address: string
           amount: number
+          bill_amount: number | null
+          bill_note: string | null
+          bill_status: string
+          bill_updated_at: string | null
           booking_date: string
           booking_time: string
           code: string
@@ -104,6 +108,7 @@ export type Database = {
           created_at: string
           customer_name: string
           customer_phone: string
+          original_amount: number | null
           paid_at: string | null
           payment: string
           payment_method: string | null
@@ -122,6 +127,10 @@ export type Database = {
         Insert: {
           address: string
           amount: number
+          bill_amount?: number | null
+          bill_note?: string | null
+          bill_status?: string
+          bill_updated_at?: string | null
           booking_date: string
           booking_time: string
           code?: string
@@ -130,6 +139,7 @@ export type Database = {
           created_at?: string
           customer_name: string
           customer_phone?: string
+          original_amount?: number | null
           paid_at?: string | null
           payment?: string
           payment_method?: string | null
@@ -148,6 +158,10 @@ export type Database = {
         Update: {
           address?: string
           amount?: number
+          bill_amount?: number | null
+          bill_note?: string | null
+          bill_status?: string
+          bill_updated_at?: string | null
           booking_date?: string
           booking_time?: string
           code?: string
@@ -156,6 +170,7 @@ export type Database = {
           created_at?: string
           customer_name?: string
           customer_phone?: string
+          original_amount?: number | null
           paid_at?: string | null
           payment?: string
           payment_method?: string | null
@@ -738,6 +753,10 @@ export type Database = {
         Returns: {
           address: string
           amount: number
+          bill_amount: number | null
+          bill_note: string | null
+          bill_status: string
+          bill_updated_at: string | null
           booking_date: string
           booking_time: string
           code: string
@@ -746,6 +765,7 @@ export type Database = {
           created_at: string
           customer_name: string
           customer_phone: string
+          original_amount: number | null
           paid_at: string | null
           payment: string
           payment_method: string | null
@@ -767,6 +787,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      customer_respond_bill: {
+        Args: { _accept: boolean; _code: string }
+        Returns: undefined
       }
       has_role: {
         Args: {
@@ -860,6 +884,10 @@ export type Database = {
         Returns: undefined
       }
       worker_available_balance: { Args: { _user: string }; Returns: number }
+      worker_propose_bill: {
+        Args: { _amount: number; _code: string; _note: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "worker" | "user"

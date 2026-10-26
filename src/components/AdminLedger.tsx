@@ -38,6 +38,7 @@ export function AdminLedger() {
   }, [live]);
 
   return <>
+    {live.some((b) => b.billStatus === "pending") ? <section className="rounded-2xl bg-amber/10 p-3 text-xs font-bold ring-1 ring-amber/20">🧾 {live.filter((b) => b.billStatus === "pending").length} booking mein worker ne naya bill daala hai — Bookings tab mein dekhein</section> : null}
     <section><SectionTitle>Poora hisaab</SectionTitle><div className="grid grid-cols-2 gap-2">
       <Stat label={`Kul bookings (${live.length})`} value={inr(sum(live, (b) => b.amount))} />
       <Stat label={`Customer se mila (${paid.length})`} value={inr(sum(paid, (b) => b.amount))} tone="text-volt" />
